@@ -88,6 +88,47 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // === TOC collapsible groups ===
+  // Make h2-level TOC items (0.3.x, 0.2.x, 0.1.x) collapsible, hiding their h3 children.
+  const tocNav = document.querySelector('.md-sidebar--secondary .md-nav--secondary');
+  if (tocNav) {
+    const topItems = tocNav.querySelectorAll(':scope > .md-nav__list > .md-nav__item');
+    topItems.forEach(item => {
+      const nestedNav = item.querySelector('.md-nav');
+      if (!nestedNav) return;
+
+      const link = item.querySelector(':scope > .md-nav__link');
+      if (!link) return;
+
+      // Start collapsed except the first group
+      const isFirst = item === topItems[0];
+      if (!isFirst) {
+        nestedNav.style.display = 'none';
+        item.classList.add('toc-collapsed');
+      } else {
+        item.classList.add('toc-expanded');
+      }
+
+      // Add toggle indicator
+      const toggle = document.createElement('span');
+      toggle.className = 'toc-toggle';
+      toggle.textContent = isFirst ? '▾' : '▸';
+      toggle.style.cssText = 'cursor:pointer;margin-right:0.3em;font-size:0.7em;user-select:none;';
+      link.prepend(toggle);
+
+      // Click to toggle
+      link.style.cursor = 'pointer';
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const collapsed = nestedNav.style.display === 'none';
+        nestedNav.style.display = collapsed ? '' : 'none';
+        toggle.textContent = collapsed ? '▾' : '▸';
+        item.classList.toggle('toc-collapsed', !collapsed);
+        item.classList.toggle('toc-expanded', collapsed);
+      });
+    });
+  }
+
   const revealItems = document.querySelectorAll('[data-reveal]');
   if ('IntersectionObserver' in window) {
     const revealObserver = new IntersectionObserver((entries, observer) => {

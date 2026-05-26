@@ -18,8 +18,10 @@ theme:
     accent: teal
   features:
     - navigation.tabs
-    - navigation.sections
     - navigation.top
+    - navigation.tracking
+    - navigation.indexes
+    - toc.follow
     - search.suggest
     - search.highlight
     - content.code.copy
@@ -42,13 +44,18 @@ markdown_extensions:
   - attr_list
   - md_in_html
 
+hooks:
+  - hooks/i18n_search.py
+
 plugins:
   - search:
       lang: [en, zh]
+      separator: '[\s\u200b\u3000\-、。，．？！；：:/.()\[\]{}<>=_"'',]+|(?<=[a-z])(?=[A-Z])|(?<=[A-Za-z])(?=[0-9])|(?<=[0-9])(?=[A-Za-z])'
   - i18n:
       docs_structure: suffix
       fallback_to_default: true
       reconfigure_material: true
+      reconfigure_search: false
       languages:
         - locale: zh
           name: 简体中文
@@ -60,39 +67,42 @@ plugins:
             Concepts: 概述
             Overview: 概述
             Basic Concepts: 基本概念
-            Introduction: 引言
             Traffic Management: 流量管理
             Security: 安全
             Observability: 可观测性
             Installation: 安装
+            Multicluster: 多集群
             Embedded Program: 嵌入程序
             Tasks: 任务
             Traffic Splitting: 流量转移
+            Traffic Routing: 流量路由
             Mutual TLS: 双向 TLS
+            Example: 示例
             Operations: 运维
-            Release Notes: 版本更新
-            Reference: 参考
+            Release Notes: 公告栏
         - locale: en
           name: English
           build: true
           site_name: Apache Kdubbo Inherent Mesh
           nav_translations:
             概述: Overview
-            引言: Introduction
             基本概念: Basic Concepts
             流量管理: Traffic Management
             安全: Security
             可观测性: Observability
             安装: Installation
+            多集群: Multicluster
             任务: Tasks
             流量切分: Traffic Splitting
+            流量转移: Traffic Splitting
+            流量路由: Traffic Routing
             双向 TLS: Mutual TLS
+            示例: Example
             运维: Operations
-            版本更新: Release Notes
-            参考: Reference
+            公告栏: Release Notes
 
 extra_css:
-  - assets/custom.css?v=20260423-shield-icon
+  - assets/custom.css?v=20260514-nav-r4
 
 extra_javascript:
   - assets/custom.js?v=20260423-code-panel
@@ -100,7 +110,7 @@ extra_javascript:
 nav:
   - Home: index.md
   - 概述:
-      - 引言: overview/index.md
+      - overview/index.md
       - 基本概念:
           - 流量管理: concepts/traffic-management.md
           - 安全: concepts/security.md
@@ -108,16 +118,19 @@ nav:
   - 安装:
       - Dubboctl: setup/install/dubboctl.md
       - Helm: setup/install/helm.md
+      - 多集群: setup/install/multicluster.md
   - 任务:
       - 流量管理:
+          - 流量路由: tasks/traffic/routing/routing.md
           - 流量转移: tasks/traffic/canary/canary.md
           - 网关: tasks/traffic/ingress/gateway-api.md
       - 安全:
           - mTLS: tasks/security/mtls.md
+          - JWT 认证与授权: tasks/security/jwt.md
       - 可观测性:
           - 指标: tasks/observability/metrics/metrics.md
+  - 示例: example/index.md
   - 运维: operation/index.md
-  - 版本更新: latest/release/index.md
-  - 参考: reference/index.md
+  - 公告栏: latest/release/index.md
 
 copyright: Copyright © 2026 The Apache Kdubbo Team.

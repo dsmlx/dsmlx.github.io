@@ -1,5 +1,8 @@
 # 指标
 
+> 目前属于设计完毕阶段，该任务需要使用示例，即将推出
+
+
 ## 部署服务
 ```bash
 kubectl apply -f samples/addons

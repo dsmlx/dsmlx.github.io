@@ -37,9 +37,10 @@
         };
       };
       var syncHtml = function (value) {
-        applyColor(document.documentElement, value);
-        document.documentElement.style.background = value.scheme === "slate" ? "#020807" : "#f5fbf8";
-        document.documentElement.style.colorScheme = value.scheme === "slate" ? "dark" : "light";
+        var forced = { scheme: "default", primary: "teal", accent: "teal" };
+        applyColor(document.documentElement, forced);
+        document.documentElement.style.background = "#FAF6F1";
+        document.documentElement.style.colorScheme = "light";
       };
 
       try {

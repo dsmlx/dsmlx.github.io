@@ -1,9 +1,7 @@
 # 流量转移
 
-## 前提条件
+> 目前属于设计完毕阶段，该任务需要使用示例，即将推出
 
-1. 已安装 Dubbo 控制平面的 Kubernetes 集群
-2. 已配置 kubectl 以访问集群
 
 ## 部署
 
@@ -32,26 +30,27 @@ metadata:
 spec:
   hosts:
   - nginx.app.svc.cluster.local
-  routes:
-  - service:
-    - name: v1
-      host: nginx.app.svc.cluster.local
-      labels:
-        version: v1
-      port:
-        number: 80
-      weight: 63
-    - name: v2
-      host: nginx.app.svc.cluster.local
-      labels:
-        version: v2
-      port:
-        number: 80
-      weight: 37
+  rules:
+  - routes:
+    - service:
+      - name: v1
+        host: nginx.app.svc.cluster.local
+        labels:
+          version: v1
+        port:
+          number: 80
+        weight: 63
+      - name: v2
+        host: nginx.app.svc.cluster.local
+        labels:
+          version: v2
+        port:
+          number: 80
+        weight: 37
 EOF
 ```
 
-`xclient` 使用逐请求选路，不再先算好固定数量再批量发送。
+这里没有写 `match`，因此该规则是默认兜底规则。`xclient` 使用逐请求选路，不再先算好固定数量再批量发送。
 ```bash
 kubectl -n app exec deploy/nginx-consumer -- dubbod xclient 100 | sort | uniq -c
 ```

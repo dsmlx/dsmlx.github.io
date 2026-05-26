@@ -1,0 +1,88 @@
+/* tokens.css — Design tokens (CSS variables) for color, radius, shadow, spacing, motion, typography, layout. Single source of truth for all visual values. */
+
+:root {
+  /* color — semantic */
+  --ds-color-bg: #ffffff;
+  --ds-color-bg-subtle: #f8fafc;
+  --ds-color-surface: #ffffff;
+  --ds-color-surface-elevated: #ffffff;
+  --ds-color-border: rgba(15, 23, 42, 0.08);
+  --ds-color-border-strong: rgba(15, 23, 42, 0.16);
+  --ds-color-text-primary: #0f172a;
+  --ds-color-text-secondary: #334155;
+  --ds-color-text-muted: #64748b;
+  --ds-color-text-inverse: #ffffff;
+  --ds-color-accent: #277b54;        /* 品牌绿 */
+  --ds-color-accent-hover: #1e5c3e;
+  --ds-color-accent-subtle: rgba(39, 123, 84, 0.08);
+  --ds-color-info: #2563eb;
+  --ds-color-success: #16a34a;
+  --ds-color-warning: #d97706;
+  --ds-color-danger: #dc2626;
+  --ds-color-code-inline-bg: #eef2f7;
+  --ds-color-code-inline-fg: #b45309;
+  --ds-color-code-block-bg: #f4f4f5;
+
+  /* radius */
+  --ds-radius-sm: 4px;
+  --ds-radius-md: 8px;
+  --ds-radius-lg: 12px;
+  --ds-radius-pill: 999px;
+
+  /* shadow */
+  --ds-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --ds-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --ds-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+
+  /* spacing (4px 基数) */
+  --ds-space-0: 0;
+  --ds-space-1: 0.25rem;
+  --ds-space-2: 0.5rem;
+  --ds-space-3: 0.75rem;
+  --ds-space-4: 1rem;
+  --ds-space-5: 1.5rem;
+  --ds-space-6: 2rem;
+  --ds-space-7: 3rem;
+  --ds-space-8: 4rem;
+
+  /* motion */
+  --ds-motion-fast: 120ms;
+  --ds-motion-base: 200ms;
+  --ds-motion-slow: 360ms;
+  --ds-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* typography */
+  --ds-font-sans: "IBM Plex Sans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --ds-font-display: "Plus Jakarta Sans", var(--ds-font-sans);
+  --ds-font-mono: "JetBrains Mono", "Fira Code", Consolas, monospace;
+
+  /* layout */
+  --ds-content-max: 48rem;
+  --ds-grid-max: 88rem;
+}
+[data-md-color-scheme="slate"] {
+  /* slate — dark overrides */
+  --ds-color-bg: #0b1412;
+  --ds-color-bg-subtle: #07100e;
+  --ds-color-surface: #101816;
+  --ds-color-surface-elevated: #162220;
+  --ds-color-border: rgba(243, 255, 252, 0.08);
+  --ds-color-border-strong: rgba(243, 255, 252, 0.16);
+  --ds-color-text-primary: #f3fffc;
+  --ds-color-text-secondary: #cbd5e1;
+  --ds-color-text-muted: #94a3b8;
+  --ds-color-text-inverse: #0f172a;
+  --ds-color-accent: #3b9e74;
+  --ds-color-accent-hover: #5ab88b;
+  --ds-color-accent-subtle: rgba(59, 158, 116, 0.16);
+  --ds-color-code-inline-bg: rgba(212, 160, 23, 0.12);
+  --ds-color-code-inline-fg: #e3b341;
+  --ds-color-code-block-bg: #101312;
+  --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --ds-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
+  --ds-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+:root {
+  /* Material theme bridge — neutralised; overrides.css is the single source of truth */
+}
