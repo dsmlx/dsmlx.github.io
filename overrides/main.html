@@ -4,17 +4,18 @@
   {{ super() }}
   <style>
     html[data-md-color-scheme="default"] {
-      background: #f5fbf8;
+      background: #ffffff;
       color-scheme: light;
     }
 
     html[data-md-color-scheme="slate"] {
-      background: #020807;
-      color-scheme: dark;
+      background: #ffffff;
+      color-scheme: light;
     }
   </style>
   <script>
     (function () {
+      var forced = { scheme: "default", primary: "teal", accent: "teal" };
       var color = null;
       var applyColor = function (target, value) {
         if (!target || !value) {
@@ -37,9 +38,8 @@
         };
       };
       var syncHtml = function (value) {
-        var forced = { scheme: "default", primary: "teal", accent: "teal" };
         applyColor(document.documentElement, forced);
-        document.documentElement.style.background = "#FAF6F1";
+        document.documentElement.style.background = "var(--mesh-bg, #FFFFFF)";
         document.documentElement.style.colorScheme = "light";
       };
 
@@ -74,11 +74,12 @@
       syncHtml(color);
 
       document.addEventListener("DOMContentLoaded", function () {
-        applyColor(document.body, color);
-        syncHtml(readColor(document.body) || color);
+        applyColor(document.body, forced);
+        syncHtml(forced);
 
         new MutationObserver(function () {
-          syncHtml(readColor(document.body) || color);
+          applyColor(document.body, forced);
+          syncHtml(forced);
         }).observe(document.body, {
           attributes: true,
           attributeFilter: [

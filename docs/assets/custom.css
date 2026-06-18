@@ -1,8 +1,8 @@
 /* custom.css — Main entry. Aggregates all CSS layers in dependency order.
    Do NOT add rules here. Add rules to the appropriate layer file. */
-@import url("./tokens.css");
-@import url("./base.css");
-@import url("./layout.css");
-@import url("./components.css");
-@import url("./overrides.css");
-@import url("./landing.css");
+@import url("./tokens.css?v=20260618-default-font-eye-scroll-r1");
+@import url("./base.css?v=20260618-default-font-eye-scroll-r1");
+@import url("./layout.css?v=20260618-default-font-eye-scroll-r1");
+@import url("./components.css?v=20260618-default-font-eye-scroll-r1");
+@import url("./overrides.css?v=20260618-default-font-eye-scroll-r1");
+@import url("./landing.css?v=20260618-default-font-eye-scroll-r1");

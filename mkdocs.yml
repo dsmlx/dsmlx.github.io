@@ -1,4 +1,4 @@
-site_name: Apache Kdubbo Inherent Mesh
+site_name: Kdubbo
 site_url: https://kdubbo.github.io/
 use_directory_urls: true
 
@@ -61,7 +61,7 @@ plugins:
           name: 简体中文
           default: true
           build: true
-          site_name: Apache Kdubbo Inherent Mesh
+          site_name: Kdubbo
           nav_translations:
             Home: 首页
             Concepts: 概述
@@ -83,7 +83,7 @@ plugins:
         - locale: en
           name: English
           build: true
-          site_name: Apache Kdubbo Inherent Mesh
+          site_name: Kdubbo
           nav_translations:
             概述: Overview
             基本概念: Basic Concepts
@@ -102,10 +102,10 @@ plugins:
             公告栏: Release Notes
 
 extra_css:
-  - assets/custom.css?v=20260514-nav-r4
+  - assets/custom.css?v=20260618-default-font-eye-scroll-r1
 
 extra_javascript:
-  - assets/custom.js?v=20260423-code-panel
+  - assets/custom.js?v=20260618-default-font-eye-scroll-r1
 
 nav:
   - Home: index.md
@@ -129,7 +129,7 @@ nav:
           - JWT 认证与授权: tasks/security/jwt.md
       - 可观测性:
           - 指标: tasks/observability/metrics/metrics.md
-  - 示例: example/index.md
+  - 示例: example/moviereview.md
   - 运维: operation/index.md
   - 公告栏: latest/release/index.md
 

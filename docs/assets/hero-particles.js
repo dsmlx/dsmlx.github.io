@@ -64,7 +64,7 @@
 
       // Large numeric watermark in bottom-right
       ctx.save();
-      ctx.font = '900 ' + Math.round(Math.min(h * 0.55, 380)) + "px 'Bricolage Grotesque', sans-serif";
+      ctx.font = '900 ' + Math.round(Math.min(h * 0.55, 380)) + 'px system-ui, sans-serif';
       ctx.fillStyle = 'rgba(20, 20, 22, 0.035)';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'bottom';
@@ -74,12 +74,12 @@
       // Small labels on edges
       ctx.save();
       ctx.fillStyle = 'rgba(20, 20, 22, 0.35)';
-      ctx.font = "500 10px 'JetBrains Mono', monospace";
+      ctx.font = '500 10px system-ui, sans-serif';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'top';
       ctx.fillText('GRID / 12', 16, 16);
       ctx.textAlign = 'right';
-      ctx.fillText('SET IN BRICOLAGE', w - 16, 16);
+      ctx.fillText('SYSTEM UI', w - 16, 16);
       ctx.restore();
     }
 

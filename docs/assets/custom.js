@@ -1,4 +1,44 @@
 document.addEventListener('DOMContentLoaded', function() {
+  const root = document.documentElement;
+  const scrollRange = 560;
+  const colorStops = {
+    page: [[255, 255, 255], [244, 247, 241]],
+    panel: [[245, 247, 250], [237, 243, 233]]
+  };
+
+  const mix = (from, to, progress) => from.map((value, index) => {
+    return Math.round(value + (to[index] - value) * progress);
+  });
+
+  const applyScrollTone = () => {
+    const progress = Math.min(1, Math.max(0, window.scrollY / scrollRange));
+    const page = mix(colorStops.page[0], colorStops.page[1], progress);
+    const panel = mix(colorStops.panel[0], colorStops.panel[1], progress);
+    const targets = [root, document.body].filter(Boolean);
+
+    targets.forEach(target => {
+      target.style.setProperty('--mesh-bg', `rgb(${page.join(', ')})`);
+      target.style.setProperty('--mesh-bg-rgb', page.join(', '));
+      target.style.setProperty('--mesh-bg-deep', `rgb(${panel.join(', ')})`);
+      target.style.setProperty('--mesh-bg-section', `rgb(${panel.join(', ')})`);
+    });
+  };
+
+  let toneFrame = 0;
+  const requestScrollTone = () => {
+    if (toneFrame) {
+      return;
+    }
+
+    toneFrame = window.requestAnimationFrame(() => {
+      toneFrame = 0;
+      applyScrollTone();
+    });
+  };
+
+  applyScrollTone();
+  window.addEventListener('scroll', requestScrollTone, { passive: true });
+
   const alignTabsWithHeaderTitle = () => {
     const title = document.querySelector('.md-header__title .md-header__topic:first-child .md-ellipsis')
       || document.querySelector('.md-header__title .md-ellipsis');
