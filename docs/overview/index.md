@@ -19,7 +19,7 @@ curl -L https://dubbo.apache.org/downloadDubbo | sh -
 转到 Dubbo 包目录：
 
 ```bash
-cd dubbo-0.4.0
+cd dubbo-0.4.1
 ```
 
 使用 default 配置文件安装 Dubbo：

@@ -6,6 +6,19 @@
 
     ## 0.4.x
 
+    ### 0.4.1
+
+    发布日期：2026-06-19
+
+    - 新增多集群功能
+    - 新增微服务示例
+    - 新增 mesh CNI
+    - 修复并优化已知问题
+
+    [查看 GitHub Release](https://github.com/apache/dubbo-kubernetes/releases/tag/0.4.1)
+
+    ---
+
     ### 0.4.0
 
     发布日期：2026-05-17
@@ -242,8 +255,11 @@
     **支持范围**
 
     - MeshService 相关能力
+    - 多集群功能
+    - 微服务示例
+    - mesh CNI
     - 安全基础设施能力
     - dubboctl 新增子命令
-    - 已知问题修复
+    - 已知问题修复与优化
 
     如需了解更多支持信息，请访问 [GitHub Discussions](https://github.com/apache/dubbo-kubernetes/discussions)。
