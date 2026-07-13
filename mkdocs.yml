@@ -117,12 +117,14 @@ nav:
           - 流量管理: concepts/traffic-management.md
           - 安全: concepts/security.md
           - 可观测性: concepts/observability.md
-  - 可扩展性: extensibility/index.md
+          - 可扩展性: concepts/extensibility.md
   - 安装:
       - Dubboctl: setup/install/dubboctl.md
       - Helm: setup/install/helm.md
       - 多集群: setup/install/multicluster.md
   - 任务:
+      - 可扩展性:
+          - 扩展网格服务: tasks/extensibility/service-entry.md
       - 流量管理:
           - 流量路由: tasks/traffic/routing/routing.md
           - 流量转移: tasks/traffic/canary/canary.md
