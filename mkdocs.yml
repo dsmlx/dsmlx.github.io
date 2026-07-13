@@ -70,6 +70,7 @@ plugins:
             Traffic Management: 流量管理
             Security: 安全
             Observability: 可观测性
+            Extensibility: 可扩展性
             Installation: 安装
             Multicluster: 多集群
             Embedded Program: 嵌入程序
@@ -90,6 +91,7 @@ plugins:
             流量管理: Traffic Management
             安全: Security
             可观测性: Observability
+            可扩展性: Extensibility
             安装: Installation
             多集群: Multicluster
             任务: Tasks
@@ -115,6 +117,7 @@ nav:
           - 流量管理: concepts/traffic-management.md
           - 安全: concepts/security.md
           - 可观测性: concepts/observability.md
+  - 可扩展性: extensibility/index.md
   - 安装:
       - Dubboctl: setup/install/dubboctl.md
       - Helm: setup/install/helm.md
