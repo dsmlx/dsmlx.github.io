@@ -123,8 +123,6 @@ nav:
       - Helm: setup/install/helm.md
       - 多集群: setup/install/multicluster.md
   - 任务:
-      - 可扩展性:
-          - 扩展网格服务: tasks/extensibility/service-entry.md
       - 流量管理:
           - 流量路由: tasks/traffic/routing/routing.md
           - 流量转移: tasks/traffic/canary/canary.md
@@ -134,6 +132,8 @@ nav:
           - JWT 认证与授权: tasks/security/jwt.md
       - 可观测性:
           - 指标: tasks/observability/metrics/metrics.md
+      - 可扩展性:
+          - 扩展网格服务: tasks/extensibility/service-entry.md
   - 示例: example/moviereview.md
   - 运维: operation/index.md
   - 公告栏: latest/release/index.md
