@@ -1,9 +1,7 @@
-# 认证策略
-
 > 目前属于设计完毕阶段，该任务需要使用示例，即将推出
 
 
-本任务使用 `samples/app` 的 nginx 服务验证 Dubbo mTLS。mTLS 是 Mutual TLS，表示客户端和服务端使用证书互相校验身份；`xserver` 是注入到服务端 Pod 的入站代理，监听 `15080` 并转发到本地业务端口。
+本任务使用 `samples/app` 的 nginx 服务验证 Dubbo mTLS。mTLS 是 Mutual TLS，表示客户端和服务端使用证书互相校验身份；`grpc-inbound` 是注入到服务端 Pod 的入站代理，监听 `15080` 并转发到本地业务端口。
 
 ## 前提条件
 
@@ -11,6 +9,7 @@
 kubectl create ns app
 kubectl label namespace app dubbo-injection=enabled
 kubectl apply -f samples/app/deployment.yaml
+kubectl apply -f samples/app/httproute.yaml
 ```
 
 ## 启用宽容模式
@@ -19,35 +18,6 @@ kubectl apply -f samples/app/deployment.yaml
 
 ```bash
 cat <<EOF | kubectl apply -f -
-apiVersion: networking.dubbo.apache.org/v1alpha3
-kind: MeshService
-metadata:
-  name: nginx-routing
-  namespace: app
-spec:
-  hosts:
-  - nginx.app.svc.cluster.local
-  trafficPolicy:
-    tls:
-      mode: DUBBO_MUTUAL
-  rules:
-  - routes:
-    - service:
-      - name: v1
-        host: nginx.app.svc.cluster.local
-        labels:
-          version: v1
-        port:
-          number: 80
-        weight: 50
-      - name: v2
-        host: nginx.app.svc.cluster.local
-        labels:
-          version: v2
-        port:
-          number: 80
-        weight: 50
----
 apiVersion: security.dubbo.apache.org/v1alpha3
 kind: PeerAuthentication
 metadata:
@@ -65,13 +35,11 @@ EOF
 
 ```bash
 kubectl -n app exec deploy/nginx-consumer -- \
-  dubbod xclient --print-route --expect v1=50,v2=50
+  dubbod grpc-outbound --print-route --expect nginx-v1=50,nginx-v2=50
 ```
 
 关键字段：
 
-- `tlsMode: DUBBO_MUTUAL`
-- `endpoints[].port: 15080`
 - `services[].ports[].mtlsMode: PERMISSIVE`
 
 确认明文请求也可以进入服务：
@@ -107,7 +75,7 @@ kubectl -n app patch peerauthentication app-permissive-mtls --type='merge' \
 
 ```bash
 kubectl -n app exec deploy/nginx-consumer -- \
-  dubbod xclient --expect v1=50,v2=50 20 | sort | uniq -c
+  dubbod grpc-outbound --expect nginx-v1=50,nginx-v2=50 20 | sort | uniq -c
 ```
 
 确认明文请求不能绕过 mTLS：
@@ -142,9 +110,9 @@ namespace 级别策略优先于全局策略，适合按 namespace 分阶段迁�
 ## 清理
 
 ```bash
-kubectl -n app delete meshservice nginx-routing --ignore-not-found=true
-kubectl -n app delete peerauthentication app-permissive-mtls --ignore-not-found=true
-kubectl -n dubbo-system delete peerauthentication default --ignore-not-found=true
-kubectl delete -f samples/app/deployment.yaml --ignore-not-found=true
+kubectl -n app delete httproute nginx-routing
+kubectl -n app delete peerauthentication app-permissive-mtls
+kubectl -n dubbo-system delete peerauthentication default
+kubectl delete -f samples/app/deployment.yaml
 kubectl delete ns app
 ```

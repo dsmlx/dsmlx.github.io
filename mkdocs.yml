@@ -1,4 +1,4 @@
-site_name: Kdubbo
+site_name: Kdubbo - Dubbo Inherent Mesh
 site_url: https://kdubbo.github.io/
 use_directory_urls: true
 
@@ -14,13 +14,14 @@ theme:
   font: false
   palette:
     scheme: default
-    primary: teal
-    accent: teal
+    primary: custom
+    accent: custom
   features:
     - navigation.tabs
     - navigation.top
     - navigation.tracking
     - navigation.indexes
+    - navigation.footer
     - toc.follow
     - search.suggest
     - search.highlight
@@ -61,7 +62,7 @@ plugins:
           name: 简体中文
           default: true
           build: true
-          site_name: Kdubbo
+          site_name: Kdubbo - Dubbo Inherent Mesh
           nav_translations:
             Home: 首页
             Concepts: 概述
@@ -71,6 +72,7 @@ plugins:
             Security: 安全
             Observability: 可观测性
             Extensibility: 可扩展性
+            Virtual Machine Workloads: 虚拟机接入
             Installation: 安装
             Multicluster: 多集群
             Embedded Program: 嵌入程序
@@ -84,7 +86,7 @@ plugins:
         - locale: en
           name: English
           build: true
-          site_name: Kdubbo
+          site_name: Kdubbo - Dubbo Inherent Mesh
           nav_translations:
             概述: Overview
             基本概念: Basic Concepts
@@ -92,22 +94,24 @@ plugins:
             安全: Security
             可观测性: Observability
             可扩展性: Extensibility
+            虚拟机接入: Virtual Machine Workloads
             安装: Installation
             多集群: Multicluster
             任务: Tasks
             流量切分: Traffic Splitting
             流量转移: Traffic Splitting
             流量路由: Traffic Routing
+            网关: Gateway
             双向 TLS: Mutual TLS
             示例: Example
             运维: Operations
             公告栏: Release Notes
 
 extra_css:
-  - assets/custom.css?v=20260618-default-font-eye-scroll-r1
+  - assets/custom.css?v=20260722-light-r1
 
 extra_javascript:
-  - assets/custom.js?v=20260618-default-font-eye-scroll-r1
+  - assets/custom.js?v=20260722-light-r1
 
 nav:
   - Home: index.md
@@ -126,15 +130,24 @@ nav:
       - 流量管理:
           - 流量路由: tasks/traffic/routing/routing.md
           - 流量转移: tasks/traffic/canary/canary.md
-          - 网关: tasks/traffic/ingress/gateway-api.md
+          - 请求超时: tasks/traffic/request-timeouts/request-timeouts.md
+          - 熔断: tasks/traffic/circuit-breaking/circuit-breaking.md
+          - 网关:
+              - Ingress: tasks/traffic/ingress/gateway-api.md
+              - Egress: tasks/traffic/egress/egress.md
       - 安全:
           - mTLS: tasks/security/mtls.md
           - JWT 认证与授权: tasks/security/jwt.md
       - 可观测性:
           - 指标: tasks/observability/metrics/metrics.md
+          - 链路追踪: tasks/observability/tracing/tracing.md
+          - 日志: tasks/observability/logs/logs.md
       - 可扩展性:
           - 扩展网格服务: tasks/extensibility/service-entry.md
+          - 虚拟机接入: tasks/extensibility/virtual-machines.md
   - 示例: example/moviereview.md
+  - 参考:
+      - 能力矩阵: reference/capability-matrix.md
   - 运维: operation/index.md
   - 公告栏: latest/release/index.md
 

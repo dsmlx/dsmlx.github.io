@@ -24,5 +24,5 @@ kubectl get svc -n moviereview moviepage
 Clean up the sample:
 
 ```bash
-kubectl delete -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/samples/moviereview/deployment.yaml --ignore-not-found=true
+kubectl delete -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/samples/moviereview/deployment.yaml
 ```

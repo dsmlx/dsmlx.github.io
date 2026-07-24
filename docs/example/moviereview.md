@@ -22,7 +22,6 @@ kubectl get svc -n moviereview moviepage
 ```
 
 清理示例：
-
 ```bash
 kubectl delete -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/samples/moviereview/deployment.yaml --ignore-not-found=true
 ```

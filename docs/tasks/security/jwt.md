@@ -1,5 +1,3 @@
-# JWT 认证与授权
-
 > 目前属于设计完毕阶段，该任务需要使用示例，即将推出
 
 
@@ -31,15 +29,11 @@ spec:
       app: httpbin
   jwtRules:
   - issuer: "testing@secure.dubbo.apache.org"
-    jwksUri: "tools/jwt/samples/jwks.json"
+    jwksUri: "https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/tools/jwt/sample/jwks.json"
 EOF
 ```
 
-发布到远程文档或 release 后，可以把 `jwksUri` 改成：
-
-```text
-https://raw.githubusercontent.com/apache/dubbo-kubernetes/releases/tools/jwt/samples/jwks.json
-```
+`jwksUri` 必须是 `http`/`https` URL，相对路径会被校验 webhook 拒绝。离线环境可以改用内联 `jwks` 字段直接嵌入 JWKS 内容（与 `jwksUri` 二选一）。
 
 验证没有 JWT 的请求被允许：
 
@@ -174,9 +168,9 @@ kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 --
 ## 清理
 
 ```bash
-kubectl -n foo delete requestauthentication jwt-example --ignore-not-found=true
-kubectl -n foo delete authorizationpolicy require-jwt --ignore-not-found=true
-kubectl -n foo delete deploy httpbin --ignore-not-found=true
-kubectl -n foo delete svc httpbin --ignore-not-found=true
+kubectl -n foo delete requestauthentication jwt-example
+kubectl -n foo delete authorizationpolicy require-jwt
+kubectl -n foo delete deploy httpbin
+kubectl -n foo delete svc httpbin
 kubectl delete ns foo
 ```

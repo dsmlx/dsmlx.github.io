@@ -1,21 +1,21 @@
 /* tokens.css — Design tokens (CSS variables) for color, radius, shadow, spacing, motion, typography, layout. Single source of truth for all visual values. */
 
 :root {
-  /* color — semantic */
-  --ds-color-bg: #ffffff;
-  --ds-color-bg-subtle: #f8fafc;
-  --ds-color-surface: #ffffff;
-  --ds-color-surface-elevated: #ffffff;
-  --ds-color-border: rgba(15, 23, 42, 0.08);
-  --ds-color-border-strong: rgba(15, 23, 42, 0.16);
-  --ds-color-text-primary: #0f172a;
-  --ds-color-text-secondary: #334155;
-  --ds-color-text-muted: #64748b;
-  --ds-color-text-inverse: #ffffff;
-  --ds-color-accent: #277b54;        /* 品牌绿 */
-  --ds-color-accent-hover: #1e5c3e;
-  --ds-color-accent-subtle: rgba(39, 123, 84, 0.08);
-  --ds-color-info: #2563eb;
+  /* color — semantic (light "porcelain blueprint") */
+  --ds-color-bg: #EFF3F9;
+  --ds-color-bg-subtle: #E4EAF3;
+  --ds-color-surface: #FFFFFF;
+  --ds-color-surface-elevated: #E4EAF3;
+  --ds-color-border: rgba(26, 35, 50, 0.10);
+  --ds-color-border-strong: rgba(26, 35, 50, 0.24);
+  --ds-color-text-primary: #1A2332;
+  --ds-color-text-secondary: #3E4859;
+  --ds-color-text-muted: #636F80;
+  --ds-color-text-inverse: #FFFFFF;
+  --ds-color-accent: #1D5BC4;        /* 品牌蓝，与 --mesh-accent 一致 */
+  --ds-color-accent-hover: #1749A3;
+  --ds-color-accent-subtle: rgba(29, 91, 196, 0.12);
+  --ds-color-info: #1D5BC4;
   --ds-color-success: #16a34a;
   --ds-color-warning: #d97706;
   --ds-color-danger: #dc2626;
@@ -30,9 +30,9 @@
   --ds-radius-pill: 999px;
 
   /* shadow */
-  --ds-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --ds-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
-  --ds-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+  --ds-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --ds-shadow-md: 0 4px 14px rgba(15, 23, 42, 0.10);
+  --ds-shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.16);
 
   /* spacing (4px 基数) */
   --ds-space-0: 0;
@@ -61,26 +61,27 @@
   --ds-grid-max: 88rem;
 }
 [data-md-color-scheme="slate"] {
-  /* slate — dark overrides */
-  --ds-color-bg: #0b1412;
-  --ds-color-bg-subtle: #07100e;
-  --ds-color-surface: #101816;
-  --ds-color-surface-elevated: #162220;
-  --ds-color-border: rgba(243, 255, 252, 0.08);
-  --ds-color-border-strong: rgba(243, 255, 252, 0.16);
-  --ds-color-text-primary: #f3fffc;
-  --ds-color-text-secondary: #cbd5e1;
-  --ds-color-text-muted: #94a3b8;
-  --ds-color-text-inverse: #0f172a;
-  --ds-color-accent: #3b9e74;
-  --ds-color-accent-hover: #5ab88b;
-  --ds-color-accent-subtle: rgba(59, 158, 116, 0.16);
-  --ds-color-code-inline-bg: rgba(212, 160, 23, 0.12);
-  --ds-color-code-inline-fg: #e3b341;
-  --ds-color-code-block-bg: #101312;
-  --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --ds-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
-  --ds-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+  /* single light scheme — mirror :root so a stale palette cookie can't
+     produce a broken half-dark page */
+  --ds-color-bg: #EFF3F9;
+  --ds-color-bg-subtle: #E4EAF3;
+  --ds-color-surface: #FFFFFF;
+  --ds-color-surface-elevated: #E4EAF3;
+  --ds-color-border: rgba(26, 35, 50, 0.10);
+  --ds-color-border-strong: rgba(26, 35, 50, 0.24);
+  --ds-color-text-primary: #1A2332;
+  --ds-color-text-secondary: #3E4859;
+  --ds-color-text-muted: #636F80;
+  --ds-color-text-inverse: #FFFFFF;
+  --ds-color-accent: #1D5BC4;
+  --ds-color-accent-hover: #1749A3;
+  --ds-color-accent-subtle: rgba(29, 91, 196, 0.12);
+  --ds-color-code-inline-bg: #E4EAF3;
+  --ds-color-code-inline-fg: #1D5BC4;
+  --ds-color-code-block-bg: #E4EAF3;
+  --ds-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --ds-shadow-md: 0 4px 14px rgba(15, 23, 42, 0.10);
+  --ds-shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.16);
 }
 
 :root {

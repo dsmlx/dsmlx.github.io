@@ -1,177 +1,104 @@
-Dubbo 的流量管理以 `MeshService` 资源对象为核心。`MeshService` 是网格内的虚拟服务规则，用来把客户端访问的一个或多个 `hosts` 映射到真实服务、服务版本或按权重拆分的目标。
+> 未完成撰写的文档，因为版本迭代过快，跟新版本会存在一定差异，后续会进行补充完善。
 
-`MeshService` 规则会被控制面转换为 xDS 路由，xDS 是数据面从控制面获取监听、路由、集群和端点配置的协议。它可以处理 HTTP/1.1、HTTP/2 和 gRPC 流量，常见用途包括 URI 路由、Header 路由、金丝雀发布、版本灰度和 mTLS 目标策略。
+Dubbo 的流量管理统一以 [Gateway API](https://github.com/kubernetes-sigs/gateway-api) 作为标准规范。
 
-## 网格服务
+集群入口（Ingress）流量直接使用 Gateway API 定义路由；网格内部的东西向流量则遵循 [GAMMA 计划](https://gateway-api.sigs.k8s.io/docs/mesh/gamma/)。
 
-### hosts 字段
+## 介绍
+xDS 是数据面从控制面获取监听、路由、集群和端点配置的协议，所以像 HTTPRoute 会被控制面转换为 xDS 路由。它可以处理 HTTP/1.1、HTTP/2 和 gRPC 流量。
 
-`hosts` 字段指定客户端访问的虚拟目标，可以是用户直接设定的域名，也可以是 Kubernetes Service 的短名或 FQDN。控制面会把短名解析为完全限定域名（FQDN），例如 `product` 会在 `default` 命名空间内解析为 `product.default.svc.cluster.local`。
-
-`hosts` 字段不必是 Dubbo 服务注册表中的真实条目，它只是虚拟的目标地址，因此也可以用来定义不在网格内部的虚拟主机。
+## 路由规则
 
 ```yaml
-apiVersion: networking.dubbo.apache.org/v1alpha3
-kind: MeshService
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
-  name: foo-service-routing
+  name: product-routing
   namespace: default
 spec:
-  hosts:
-    - foo.default.svc.cluster.local
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: product
+    port: 9080
   rules:
-  - routes:
-    - service:
-      - name: foo
-        host: foo.default.svc.cluster.local
-        port:
-          number: 9080
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /reviews
+    backendRefs:
+    - name: reviews
+      port: 9080
 ```
 
-### rules 字段
+## 匹配和权重
 
-`rules` 字段包含有序的路由规则。每条规则可以有 0 个或多个 `match` 条件，并把命中的请求转发到 `route` 或 `routes` 中声明的目标服务。
+路由会按照 `rules` 顺序匹配。多个 `matches` 条目是 OR 关系，同一个 `matches` 条目内的字段是 AND 关系。不写 `matches` 的规则是默认兜底规则。
 
-规则顺序就是数据面匹配顺序，推荐按“精确条件 → 宽泛条件 → 默认兜底”排列。精确规则用于特定 URI、Header 或用户流量；宽泛规则用于前缀路径或服务大类；不写 `match` 的规则就是默认兜底规则。
+路由权重版本灰度使用标准 `backendRefs`。Gateway API 的后端引用指向服务，因此版本流量应为 `reviews-v1`、`reviews-v2` 这样的服务版本。
 
+下面这个规则把 `end-user: jason` 的请求路由到 `reviews-v1`。没有命中特定用户规则的流量进入兜底目标，并按 `reviews-v2=20`、`reviews-v3=80` 分配。
 ```yaml
-apiVersion: networking.dubbo.apache.org/v1alpha3
-kind: MeshService
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
-  name: shop-routing
+  name: reviews-routing
   namespace: default
 spec:
-  hosts:
-  - shop.com
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: reviews
+    port: 9080
   rules:
-  - match:
-    - uri:
-        prefix: /order
-    route:
-    - service:
-      - name: order
-        host: order.default.svc.cluster.local
-  - match:
-    - uri:
-        prefix: /payment
-    route:
-    - service:
-      - name: payment
-        host: payment.default.svc.cluster.local
-```
-
-上面的规则让用户访问 `http://shop.com/order` 时进入 `order` 服务，访问 `http://shop.com/payment` 时进入 `payment` 服务。`shop.com` 是虚拟服务入口，真实后端仍然是独立的 Kubernetes Service。
-
-### match 字段
-
-`match` 字段描述请求匹配条件。多个 `match` 条目是 OR 关系，同一个 `match` 条目内的字段是 AND 关系。
-
-支持的常用条件：
-
-- `uri`：匹配请求路径，支持 `exact`、`prefix`、`regex`。
-- `headers`：匹配请求头，常用于用户、租户、实验分组。
-- `method`：匹配 HTTP 方法。
-- `queryParams`：匹配查询参数。
-- `port`：匹配目标端口。
-- `host`：匹配请求主机名。
-
-```yaml
-rules:
-- match:
-  - headers:
-      end-user:
-        exact: jason
-  route:
-  - service:
-    - name: product
-      host: product.default.svc.cluster.local
-      labels:
-        version: v2
-```
-
-### route 和 routes 字段
-
-`route` 表示命中当前 `match` 后的主要转发目标，`routes` 表示后续兜底或按权重拆分的目标。两者的元素结构一致，都是一个或多个 `service` 目标。
-
-当一个目标设置了 `labels`，控制面会生成对应的子集路由；当多个目标设置 `weight`，数据面按权重分配流量。
-
-```yaml
-rules:
-- match:
-  - headers:
-      end-user:
-        exact: jason
-  route:
-  - service:
-    - name: product-v1
-      host: product.default.svc.cluster.local
-      labels:
-        version: v1
-  routes:
-  - service:
-    - name: product-v2
-      host: product.default.svc.cluster.local
-      labels:
-        version: v2
+  - matches:
+    - headers:
+      - name: end-user
+        value: jason
+    backendRefs:
+    - name: reviews-v1
+      port: 9080
+      weight: 100
+  - backendRefs:
+    - name: reviews-v2
+      port: 9080
       weight: 20
-    - name: product-v3
-      host: product.default.svc.cluster.local
-      labels:
-        version: v3
+    - name: reviews-v3
+      port: 9080
       weight: 80
 ```
 
-这个规则把 `end-user: jason` 的请求先路由到 `v1`。没有命中特定用户规则的流量进入兜底目标，并按 `v2=20`、`v3=80` 分配。
-
-### trafficPolicy 字段
-
-`trafficPolicy` 字段描述目标流量策略。当前常用策略是 TLS，例如把上游连接设置为 Dubbo 自动管理证书的 mTLS。
-
-<details>
-  <summary>服务级别</summary>
-```yaml
-trafficPolicy:
-  tls:
-    mode: DUBBO_MUTUAL
-```
-</details>
-<details>
-  <summary>全局级别</summary>
-```yaml
-apiVersion: networking.dubbo.apache.org/v1alpha3
-kind: MeshService
-metadata:
-  name: nginx-routing
-  namespace: app
-spec:
-  hosts:
-  - nginx.app.svc.cluster.local
-  trafficPolicy:
-    tls:
-      mode: DUBBO_MUTUAL
-```
-</details>
-
-
 ### 负载均衡
-通过同一条规则中的多个 `service` 和 `weight` 完成基础流量分配。权重是相对比例，不要求总和等于 100。
+通过同一条规则中的多个 `backendRefs` 和 `weight` 完成基础流量分配。权重是相对比例，不要求总和等于 100。
+
+端点级负载均衡策略由控制面统一下发，默认 `ROUND_ROBIN`。可通过 dubbod 的 `DUBBO_DEFAULT_LB_POLICY` 环境变量切换为 `LEAST_REQUEST`、`RING_HASH` 或 `RANDOM`，对所有生成的集群生效。
 
 ### 超时
-敬请期待
+使用 `HTTPRoute` 规则的 `timeouts.request` 字段设置请求超时，控制面会转换成 xDS 路由超时。详见[请求超时任务](../tasks/traffic/request-timeouts/request-timeouts.md)。
 
 ### 重试
-敬请期待
+敬请期待（xDS 传输协议尚未包含重试策略字段，路线图见下文能力边界）
 
 ### 限流
 敬请期待
 
 ### 熔断器
-敬请期待
+熔断通过 `CircuitBreakerPolicy` 以 Gateway API policy attachment 模型附着到 `Service`，包含连接池限制（`maxConnections`、`http2MaxRequests` 等）和被动异常摘除（`outlierDetection`）两组参数，当前对托管网关（dxgate）流量生效。详见[熔断任务](../tasks/traffic/circuit-breaking/circuit-breaking.md)。
 
 ### 故障注入
 敬请期待
 
+### 能力边界
+
+服务间（proxyless）路径的可配置能力受 xDS 传输协议约束：加权分流、路径/Header 匹配、请求超时、负载均衡策略与 mTLS/SAN 校验已支持；重试、连接池熔断、异常摘除、Header 改写与限流需要扩展 xDS 协议与数据面 SDK 支持，属于路线图项。`CircuitBreakerPolicy` 当前的生效范围是托管网关。
+
 ## 网关
+
+Dubbo 的网关分为 Ingress 和 Egress。Ingress 处理集群外到网格内的入口流量；Egress 处理网格内工作负载访问集群外服务的出口流量。
+
+### Ingress
+
+Ingress 使用 Gateway 暴露入口，然后指向该 Gateway：
 
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
@@ -198,3 +125,66 @@ spec:
           port: 8080
 ```
 
+### Egress
+
+Egress 使用 `ExternalName` 服务登记外部域名，内部 egress Gateway 统一承接出口请求，然后把出口请求转发到外部服务。
+
+当前 egress 不是透明捕获任意出站；业务需要访问声明过的 `ExternalName` 服务或内部 egress Gateway。
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin-egress
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: httpbin.org
+  ports:
+  - name: https
+    port: 443
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: egress-gateway
+  namespace: default
+  annotations:
+    gateway.dubbo.apache.org/service-type: ClusterIP
+spec:
+  gatewayClassName: dubbo
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: httpbin-egress
+  namespace: default
+spec:
+  parentRefs:
+  - name: egress-gateway
+    sectionName: http
+  hostnames:
+  - httpbin-egress.default.svc.cluster.local
+  rules:
+  - backendRefs:
+    - name: httpbin-egress
+      port: 443
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: httpbin-egress-tls
+  namespace: default
+spec:
+  targetRefs:
+  - group: ""
+    kind: Service
+    name: httpbin-egress
+  validation:
+    wellKnownCACertificates: System
+    hostname: httpbin.org
+```

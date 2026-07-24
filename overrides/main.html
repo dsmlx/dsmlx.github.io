@@ -3,83 +3,39 @@
 {% block extrahead %}
   {{ super() }}
   <style>
-    html[data-md-color-scheme="default"] {
-      background: #ffffff;
-      color-scheme: light;
-    }
-
+    html[data-md-color-scheme="default"],
     html[data-md-color-scheme="slate"] {
-      background: #ffffff;
+      background: #EFF3F9;
       color-scheme: light;
     }
   </style>
   <script>
     (function () {
-      var forced = { scheme: "default", primary: "teal", accent: "teal" };
-      var color = null;
-      var applyColor = function (target, value) {
-        if (!target || !value) {
+      var forced = { scheme: "default", primary: "custom", accent: "custom" };
+      var applyColor = function (target) {
+        if (!target) {
           return;
         }
 
-        target.setAttribute("data-md-color-scheme", value.scheme || "default");
-        target.setAttribute("data-md-color-primary", value.primary || "teal");
-        target.setAttribute("data-md-color-accent", value.accent || "teal");
+        target.setAttribute("data-md-color-scheme", forced.scheme);
+        target.setAttribute("data-md-color-primary", forced.primary);
+        target.setAttribute("data-md-color-accent", forced.accent);
       };
-      var readColor = function (target) {
-        if (!target) {
-          return null;
-        }
-
-        return {
-          scheme: target.getAttribute("data-md-color-scheme") || "default",
-          primary: target.getAttribute("data-md-color-primary") || "teal",
-          accent: target.getAttribute("data-md-color-accent") || "teal"
-        };
-      };
-      var syncHtml = function (value) {
-        applyColor(document.documentElement, forced);
-        document.documentElement.style.background = "var(--mesh-bg, #FFFFFF)";
+      var syncHtml = function () {
+        applyColor(document.documentElement);
+        document.documentElement.style.background = "var(--mesh-bg, #EFF3F9)";
         document.documentElement.style.colorScheme = "light";
       };
 
-      try {
-        for (var index = 0; index < localStorage.length; index += 1) {
-          var key = localStorage.key(index);
-          if (!key || !key.endsWith(".__palette")) {
-            continue;
-          }
-
-          var value = JSON.parse(localStorage.getItem(key) || "{}");
-          if (value && value.color) {
-            color = value.color;
-          }
-        }
-      } catch (error) {
-        color = null;
-      }
-
-      if (!color) {
-        color = window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? { scheme: "slate", primary: "teal", accent: "teal" }
-          : { scheme: "default", primary: "teal", accent: "teal" };
-      }
-
-      if (color.media === "(prefers-color-scheme)") {
-        color = window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? { scheme: "slate", primary: "teal", accent: "teal" }
-          : { scheme: "default", primary: "teal", accent: "teal" };
-      }
-
-      syncHtml(color);
+      syncHtml();
 
       document.addEventListener("DOMContentLoaded", function () {
-        applyColor(document.body, forced);
-        syncHtml(forced);
+        applyColor(document.body);
+        syncHtml();
 
         new MutationObserver(function () {
-          applyColor(document.body, forced);
-          syncHtml(forced);
+          applyColor(document.body);
+          syncHtml();
         }).observe(document.body, {
           attributes: true,
           attributeFilter: [

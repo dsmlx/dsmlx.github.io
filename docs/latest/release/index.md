@@ -1,10 +1,53 @@
 # 公告栏
 
-选择发布公告或支持公告，即可了解最新信息。
+选择发布公告、安全公告或支持公告，即可了解最新信息。
 
 === "发布公告"
 
     ## 0.4.x
+
+    ### 0.4.4
+
+    发布日期：2026-07-22
+
+    - 优化工程文件并规范工程实践
+    - 补充测试覆盖率与性能测试
+    - 新增协作治理模块，完善质量门禁与维护者审批流程
+    - 修复控制平面已知问题
+    - 新增探针注入功能
+    - 修复并优化构建与发布流程
+
+    [查看 GitHub Release](https://github.com/apache/dubbo-kubernetes/releases/tag/0.4.4)
+
+    ---
+
+    ### 0.4.3
+
+    发布日期：2026-07-22
+
+    - 更新测试工具并修复 CNI 已知问题
+    - 新增 Telemetry API
+    - 新增 ServiceEntry 服务注册能力
+    - 更新 CI 基础设施
+    - 更新 dubbod GUI
+
+    [查看 GitHub Release](https://github.com/apache/dubbo-kubernetes/releases/tag/0.4.3)
+
+    ---
+
+    ### 0.4.2
+
+    发布日期：2026-06-30
+
+    - 完善 Delta xDS 框架
+    - 新增流量治理超时与熔断能力
+    - 新增出口流量能力
+    - 完善可观测性能力
+    - 增强 KRT 相关能力
+
+    [查看 GitHub Release](https://github.com/apache/dubbo-kubernetes/releases/tag/0.4.2)
+
+    ---
 
     ### 0.4.1
 
@@ -23,7 +66,7 @@
 
     发布日期：2026-05-17
 
-    - 新增 MeshService 相关能力
+    - 新增流量治理相关能力
     - 新增安全基础设施能力
     - dubboctl 新增子命令
     - 修复已知问题
@@ -237,6 +280,10 @@
 
     [查看 GitHub Release](https://github.com/apache/dubbo-kubernetes/releases/tag/v0.1.0)
 
+=== "安全公告"
+
+    即将推出
+
 === "支持公告"
 
     | 版本 | 发布日期 | 停止支持日期 | 状态 |
@@ -254,7 +301,7 @@
 
     **支持范围**
 
-    - MeshService 相关能力
+    - 流量治理相关能力
     - 多集群功能
     - 微服务示例
     - mesh CNI
