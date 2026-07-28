@@ -77,7 +77,9 @@ spec:
 使用 `HTTPRoute` 规则的 `timeouts.request` 字段设置请求超时，控制面会转换成 xDS 路由超时。详见[请求超时任务](../tasks/traffic/request-timeouts/request-timeouts.md)。
 
 ### 重试
-敬请期待（xDS 传输协议尚未包含重试策略字段，路线图见下文能力边界）
+服务间的 Proxyless 出站请求使用 Gateway API `HTTPRoute.rules[].retry` 声明重试。控制面将重试次数、状态码、单次请求超时和退避转换成 RDS `RouteAction.RetryPolicy`；数据面在连接失败、连接重置或命中指定状态码时选择下一个可用端点重试。
+
+`retry` 是 Gateway API 的 Extended/Experimental 字段，需要安装对应版本的 `experimental-install.yaml`。`attempts` 表示初次请求之后最多重试多少次，不包含初次请求。`timeouts.request` 限制整个请求及全部重试的总时间，`timeouts.backendRequest` 限制每一次上游尝试。详见[请求重试任务](../tasks/traffic/request-retries/request-retries.md)。
 
 ### 限流
 敬请期待
@@ -90,7 +92,7 @@ spec:
 
 ### 能力边界
 
-服务间（proxyless）路径的可配置能力受 xDS 传输协议约束：加权分流、路径/Header 匹配、请求超时、负载均衡策略与 mTLS/SAN 校验已支持；重试、连接池熔断、异常摘除、Header 改写与限流需要扩展 xDS 协议与数据面 SDK 支持，属于路线图项。`CircuitBreakerPolicy` 当前的生效范围是托管网关。
+服务间（proxyless）路径的可配置能力受 xDS 传输协议约束：加权分流、路径/Header 匹配、请求超时、请求重试、负载均衡策略与 mTLS/SAN 校验已支持；连接池熔断、异常摘除、Header 改写与限流仍需要数据面 SDK 支持，属于路线图项。当前重试执行面是项目提供的 Proxyless outbound 数据面；托管网关的普通 HTTPRoute 转发不复用该策略。`CircuitBreakerPolicy.connectionPool.maxRetries` 只限制并发重试容量，不会主动触发重试。
 
 ## 网关
 

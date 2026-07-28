@@ -131,6 +131,7 @@ nav:
           - 流量路由: tasks/traffic/routing/routing.md
           - 流量转移: tasks/traffic/canary/canary.md
           - 请求超时: tasks/traffic/request-timeouts/request-timeouts.md
+          - 请求重试: tasks/traffic/request-retries/request-retries.md
           - 熔断: tasks/traffic/circuit-breaking/circuit-breaking.md
           - 网关:
               - Ingress: tasks/traffic/ingress/gateway-api.md
