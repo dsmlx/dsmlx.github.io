@@ -133,6 +133,7 @@ nav:
           - 请求超时: tasks/traffic/request-timeouts/request-timeouts.md
           - 请求重试: tasks/traffic/request-retries/request-retries.md
           - 熔断: tasks/traffic/circuit-breaking/circuit-breaking.md
+          - 故障注入: tasks/traffic/fault-injection/fault-injection.md
           - 网关:
               - Ingress: tasks/traffic/ingress/gateway-api.md
               - Egress: tasks/traffic/egress/egress.md

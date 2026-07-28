@@ -23,7 +23,7 @@ Proxyless 架构下，策略在应用进程内执行，因此每项能力同时�
 | 子集路由 | DestinationRule subsets | CDS 子集 cluster | 支持 |
 | 熔断 | CircuitBreakerPolicy | 入站侧下发（grpc-inbound） | 支持 |
 | Ingress / Egress 网关 | Gateway API Gateway + HTTPRoute | 网关 Deployment 由控制面托管 | 支持 |
-| 故障注入 | —            | — | 未支持 |
+| 故障注入 | FaultInjectionPolicy | RDS RouteAction.FaultPolicy + dxplane runtime config | 支持（Proxyless outbound L7；dxplane inbound L4） |
 | EDS 地域分组与端点权重 | WorkloadEntry | EDS LocalityLbEndpoints + endpoint weight | 发布；就近选择取决于数据面 LB |
 
 ## 安全
