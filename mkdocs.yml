@@ -35,7 +35,11 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_div_format
   - admonition
   - pymdownx.details
   - pymdownx.tabbed:
@@ -72,6 +76,8 @@ plugins:
             Security: 安全
             Observability: 可观测性
             Extensibility: 可扩展性
+            Scalability: 可伸缩性
+            On-Demand Activation: 按需激活
             Virtual Machine Workloads: 虚拟机接入
             Installation: 安装
             Multicluster: 多集群
@@ -94,6 +100,8 @@ plugins:
             安全: Security
             可观测性: Observability
             可扩展性: Extensibility
+            可伸缩性: Scalability
+            按需激活: On-Demand Activation
             虚拟机接入: Virtual Machine Workloads
             安装: Installation
             多集群: Multicluster
@@ -111,7 +119,9 @@ extra_css:
   - assets/custom.css?v=20260722-light-r1
 
 extra_javascript:
-  - assets/custom.js?v=20260722-light-r1
+  - assets/custom.js?v=20260726-r2
+  - https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js
+  - assets/mermaid-init.js?v=20260806
 
 nav:
   - Home: index.md
@@ -122,6 +132,16 @@ nav:
           - 安全: concepts/security.md
           - 可观测性: concepts/observability.md
           - 可扩展性: concepts/extensibility.md
+          - 可伸缩性: concepts/scalability.md
+  - dxgate:
+      - 概览: dxgate/index.md
+      - 架构: dxgate/architecture.md
+      - DxgateService: dxgate/service.md
+      - LLM: dxgate/llm.md
+      - MCP: dxgate/mcp.md
+      - A2A: dxgate/a2a.md
+      - 安全: dxgate/security.md
+      - 可观测性: dxgate/observability.md
   - 安装:
       - Dubboctl: setup/install/dubboctl.md
       - Helm: setup/install/helm.md

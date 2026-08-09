@@ -45,6 +45,35 @@ Proxyless 架构下，策略在应用进程内执行，因此每项能力同时�
 | 网格指标 / 链路追踪 / 日志 | Telemetry + observability profile | 任务 → 可观测性  | 支持 |
 | 内嵌 GUI | — | overview / logs / metrics 视图 | 支持 |
 
+## 可伸缩性
+
+按需激活只覆盖可安全等待和重放的 HTTP、unary gRPC 请求。南北向由入口 Gateway 扣住冷请求；proxyless 东西向由 `dubbod` 把冷服务 EDS 临时切到专用 Activator，后端就绪后恢复真实端点。
+
+| 能力 | 配置 API | 下发形式 | 状态 |
+|---|---|---|---|
+| 队列消费者缩容到零 | ScaledObject（KEDA 原生） | 不经过网格 | 支持 |
+| 南北向按需激活（网关入口） | ServiceActivationPolicy + ScaledObject | 网关扣住请求并上报需求，控制面提供 KEDA 外部伸缩指标 | 支持 |
+| 东西向按需激活（服务间调用） | ServiceActivationPolicy + ScaledObject | 冷 EDS 指向 Activator，热 EDS 恢复真实端点；CDS SAN 集合保持稳定 | 支持 HTTP / unary gRPC |
+| 流式请求 / 长连接激活 | — | — | 不支持：流无法在服务就绪后重放 |
+| 控制面高可用（多副本 + PDB + 拓扑打散） | 安装参数 | — | 支持 |
+| 数据面优雅排空 | — | 先摘除端点再排空连接 | 支持 |
+
+流式 RPC、长连接、有状态服务和启动时间超过调用方 deadline 的服务，最小副本数保持为一。详见[按需激活](../concepts/scalability.md)。
+
+## dxgate 应用与 AI 协议
+
+普通 HTTP 后端继续使用 Kubernetes `Service`；非标准应用协议统一使用 `DxgateService`，由 `dubbod` 编译为 xDS `AgentConfig`，dxgate 不再 watch 私有路由 CRD。
+
+| 能力 | 配置 API | 状态 |
+|---|---|---|
+| 普通 HTTP Service | HTTPRoute + Kubernetes Service | 支持 |
+| OpenAI 格式与 Anthropic 转换 | HTTPRoute + DxgateService.ai | 支持 |
+| MCP 路由、会话绑定、tools/list 聚合 | HTTPRoute + DxgateService.mcp | 支持 |
+| A2A Agent Card 与任务转发 | HTTPRoute + DxgateService.a2a | 支持 |
+| 同命名空间 Secret 凭据引用 | DxgateService.policies / provider.credential | 支持 |
+
+配置见[统一 DxgateService API](../dxgate/service.md)，架构见[dxgate 数据面](../dxgate/architecture.md)。
+
 ## 多集群
 
 | 能力 | 状态 |
