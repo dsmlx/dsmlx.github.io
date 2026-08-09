@@ -106,3 +106,5 @@ spec:
 ```
 
 The repository's no-paid-key `samples/ai-mesh` example covers ordinary `/users` and `/orders`, OpenAI, Anthropic, MCP, and A2A.
+
+Complete resources and calls by scenario: [ordinary Kubernetes Services](http-service.md), [LLM Services](llm.md), [MCP Services](mcp.md), and [A2A Services](a2a.md).

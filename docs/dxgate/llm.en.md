@@ -1,51 +1,142 @@
-# LLM routing
+# LLM Services
 
-Clients always use the OpenAI format. `DxgateService.spec.ai.provider` selects OpenAI or Anthropic, and dxgate translates both directions when needed.
+Clients can always use the OpenAI wire format. `DxgateService.spec.ai.provider` selects OpenAI or Anthropic; dxgate translates Anthropic requests, responses, and SSE events.
 
-## Configuration
+```mermaid
+%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
+flowchart TB
+  client["OpenAI-format client"] --> gateway["dxgate"]
+  gateway --> openai["OpenAI"]
+  gateway --> anthropic["Anthropic"]
+```
+
+## 1. Provider Secrets
+
+The Secret and `DxgateService` must share a namespace. Store the raw key. dxgate produces `Authorization: Bearer <key>` for OpenAI and `x-api-key` plus `anthropic-version` for Anthropic.
+
+```bash
+kubectl -n dubbo-system create secret generic openai-secret \
+  --from-literal=Authorization="$OPENAI_API_KEY"
+
+kubectl -n dubbo-system create secret generic anthropic-secret \
+  --from-literal=Authorization="$ANTHROPIC_API_KEY"
+```
+
+## 2. OpenAI
+
+Omitting `models` accepts any model submitted by the client:
 
 ```yaml
 apiVersion: networking.dubbo.apache.org/v1alpha3
 kind: DxgateService
 metadata:
-  name: chat
+  name: openai
+  namespace: dubbo-system
 spec:
   ai:
-    endpoint: https://api.anthropic.com
+    provider:
+      openai: {}
+      credential:
+        name: openai-secret
+        key: Authorization
+    routes:
+      /v1/chat/completions: COMPLETIONS
+      /v1/responses: RESPONSES
+```
+
+For a private OpenAI-compatible service or no-key testing, set `spec.ai.endpoint`, for example `http://mock-openai:8081/v1`.
+
+## 3. Anthropic
+
+`provider.anthropic.model` supplies the default when the client omits a model. The client still sends OpenAI Chat Completions:
+
+```yaml
+apiVersion: networking.dubbo.apache.org/v1alpha3
+kind: DxgateService
+metadata:
+  name: anthropic
+  namespace: dubbo-system
+spec:
+  ai:
     provider:
       anthropic:
-        model: claude-sonnet-4
+        model: claude-opus-4-6
       credential:
-        name: anthropic-key
-        key: token
-    models: [claude-sonnet-4]
-    modelRewrites:
-      claude: claude-sonnet-4
+        name: anthropic-secret
+        key: Authorization
     routes:
       /v1/chat/completions: COMPLETIONS
 ```
 
-Point `HTTPRoute.backendRefs` at this object. A custom public path can use the standard Gateway API `URLRewrite` filter to restore `/v1`:
+dxgate translates the request to Anthropic Messages and translates the response back to an OpenAI chat-completion. `usage.input_tokens` and `usage.output_tokens` become `prompt_tokens` and `completion_tokens`.
+
+## 4. HTTPRoute
+
+Use standard Gateway API `URLRewrite` filters for custom entry paths. Both paths below become the OpenAI Chat Completions path:
 
 ```yaml
-backendRefs:
-  - group: networking.dubbo.apache.org
-    kind: DxgateService
-    name: chat
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: llm
+  namespace: dubbo-system
+spec:
+  parentRefs:
+    - name: dxgate-proxy
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /openai
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /v1/chat/completions
+      backendRefs:
+        - name: openai
+          group: networking.dubbo.apache.org
+          kind: DxgateService
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /anthropic
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /v1/chat/completions
+      backendRefs:
+        - name: anthropic
+          group: networking.dubbo.apache.org
+          kind: DxgateService
 ```
 
-See [the unified DxgateService API](service.md) for the complete object.
+## 5. Calls
 
-## Models and dialects
+```bash
+kubectl apply -f openai.yaml
+kubectl apply -f anthropic.yaml
+kubectl apply -f llm-route.yaml
+kubectl port-forward -n dubbo-system deployment/dxgate-proxy 8080:80
+```
 
-An empty `models` list accepts any model. `modelRewrites` changes a client alias to the upstream model after backend selection.
+OpenAI:
 
-OpenAI backends receive OpenAI requests. Anthropic backends receive native `/v1/messages` requests; responses and SSE events are translated back to OpenAI chat completions. `usage.input_tokens` and `output_tokens` become `prompt_tokens` and `completion_tokens` for metrics and token limits.
+```bash
+curl http://localhost:8080/openai \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"gpt-5","messages":[{"role":"user","content":"hello"}]}'
+```
 
-## Credentials
+Anthropic, still using OpenAI format:
 
-The API and RDS carry only a Secret reference. The dxgate ServiceAccount can read only referenced Secrets in its namespace. OpenAI gets `Authorization: Bearer <key>`; Anthropic gets `x-api-key` plus the default `anthropic-version`.
+```bash
+curl http://localhost:8080/anthropic \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"","messages":[{"role":"user","content":"hello"}]}'
+```
 
-## Paths
-
-Standard paths include `/v1/chat/completions`, `/v1/completions`, `/v1/embeddings`, `/v1/models`, and `/v1/responses`. A custom HTTPRoute path runs `ReplacePrefixMatch` before entering the same protocol handler.
+`policies.auth` authenticates clients calling the gateway; it is not the provider key. Provider keys belong in `spec.ai.provider.credential`. See the [unified DxgateService API](service.md) for every field.

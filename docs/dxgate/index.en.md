@@ -26,4 +26,4 @@ Bringing AI workloads into a mesh usually produces two edges: one for applicatio
 
 dxgate sits at the cluster edge and handles only the hop in and out; service-to-service calls inside the cluster stay with the mesh. The edge and the mesh share one declarative model but keep separate failure domains — reloading gateway configuration does not disturb established in-mesh connections.
 
-Next, read [Gateway architecture](architecture.md) and the [unified DxgateService API](service.md). By traffic type: [LLM routing](llm.md), [MCP routing](mcp.md), [A2A forwarding](a2a.md).
+Next, read [Gateway architecture](architecture.md) and the [unified DxgateService API](service.md). Backend guides: [ordinary Kubernetes Services](http-service.md), [LLM routing](llm.md), [MCP routing](mcp.md), and [A2A forwarding](a2a.md).

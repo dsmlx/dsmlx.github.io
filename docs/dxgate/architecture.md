@@ -3,39 +3,42 @@
 dxgate 是数据面，`dubbod` 是唯一控制面。普通 HTTP 后端与 AI 后端都从 Kubernetes API 进入同一条网格配置链。
 
 ```mermaid
+%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart LR
   subgraph cp["Control plane (external)"]
     direction TB
     dubbod["dubbod<br/>Gateway API resources"]
   end
 
-  kube["Kubernetes API<br/>Gateway · HTTPRoute · Service<br/>DxgateService · Secret"]
+  subgraph kube["Kubernetes API"]
+    direction TB
+    crd["DxgateService"]
+  end
 
   subgraph dp["Data plane (dxgate)"]
     direction TB
     xds["xDS client"]
-    secrets["referenced Secret resolver"]
-    store["ConfigStore<br/>xDS snapshot"]
+    informer["CRD controller"]
+    store["ConfigStore<br/>ownership · deltas · visible conflicts"]
     proxy["proxy<br/>snapshot → routing → policies"]
   end
 
   clients["Clients"]
   targets["Services,<br/>LLM providers,<br/>MCP and A2A targets"]
 
-  kube -- "watch resources" --> dubbod
-  dubbod -- "streaming xDS<br/>listeners · clusters · AgentConfig" --> xds
-  xds --> store
-  xds -- "Secret references" --> secrets
-  secrets -. "get referenced value" .-> kube
-  secrets --> store
+  dubbod -- "streaming xDS<br/>(delta updates)" --> xds
+  crd -- "watch" --> informer
+  informer -- "status" --> crd
+  xds -- "listeners · clusters" --> store
+  informer -- "providers · backends<br/>routes · policies" --> store
   store -- "immutable snapshot" --> proxy
   clients -- "requests" --> proxy
   proxy -- "routes to" --> targets
 
   classDef ext fill:#FFFFFF,stroke:#636F80,stroke-width:1.2px,color:#1A2332;
   classDef core fill:#FFFFFF,stroke:#1D5BC4,stroke-width:1.5px,color:#1A2332;
-  class dubbod,kube,clients,targets ext;
-  class xds,secrets,store,proxy core;
+  class dubbod,crd,clients,targets ext;
+  class xds,informer,store,proxy core;
 ```
 
 ## API 边界

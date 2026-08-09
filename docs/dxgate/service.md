@@ -106,3 +106,5 @@ spec:
 ```
 
 完整的无付费 key 样例位于仓库 `samples/ai-mesh`，覆盖普通 `/users`、`/orders`、OpenAI、Anthropic、MCP 与 A2A。
+
+按场景查看完整资源与调用：[普通 Kubernetes Service](http-service.md)、[LLM Service](llm.md)、[MCP Service](mcp.md)、[A2A Service](a2a.md)。
