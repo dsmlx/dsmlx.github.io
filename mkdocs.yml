@@ -116,12 +116,12 @@ plugins:
             公告栏: Release Notes
 
 extra_css:
-  - assets/custom.css?v=20260722-light-r1
+  - assets/custom.css?v=20260809-responsive-r1
 
 extra_javascript:
   - assets/custom.js?v=20260726-r2
   - https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js
-  - assets/mermaid-init.js?v=20260806
+  - assets/mermaid-init.js?v=20260809-responsive-r1
 
 nav:
   - Home: index.md
