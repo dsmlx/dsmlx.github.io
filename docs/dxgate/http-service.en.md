@@ -3,7 +3,6 @@
 Ordinary HTTP backends do not require a `DxgateService`. `HTTPRoute.backendRefs` references core Kubernetes `Service` objects directly. `dubbod` compiles routes and endpoints into xDS; dxgate only forwards traffic.
 
 ```mermaid
-%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart TB
   client["Client"] --> gateway["dxgate"]
   gateway -->|"/users"| users["user-service:8080"]

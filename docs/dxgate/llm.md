@@ -3,7 +3,6 @@
 客户端始终可以使用 OpenAI 格式。`DxgateService.spec.ai.provider` 选择 OpenAI 或 Anthropic；Anthropic 后端由 dxgate 转换请求、响应和 SSE 事件。
 
 ```mermaid
-%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart TB
   client["OpenAI-format client"] --> gateway["dxgate"]
   gateway --> openai["OpenAI"]

@@ -39,18 +39,13 @@
     flowchart: {
       htmlLabels: true,
       curve: "basis",
-      // Enough air that labelled edges do not collide with the boxes.
-      nodeSpacing: 44,
-      rankSpacing: 56,
-      padding: 12,
-      // Render at the diagram's natural size instead of scaling it down to the
-      // content column. Scaling a wide flow to fit shrinks its type with it,
-      // which is how an architecture diagram ends up unreadable; the container
-      // scrolls instead.
-      useMaxWidth: false,
+      nodeSpacing: 32,
+      rankSpacing: 40,
+      padding: 8,
+      useMaxWidth: true,
     },
     sequence: {
-      useMaxWidth: false,
+      useMaxWidth: true,
       actorFontFamily: fontStack,
       noteFontFamily: fontStack,
       messageFontFamily: fontStack,

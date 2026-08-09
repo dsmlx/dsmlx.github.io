@@ -3,7 +3,6 @@
 Clients can always use the OpenAI wire format. `DxgateService.spec.ai.provider` selects OpenAI or Anthropic; dxgate translates Anthropic requests, responses, and SSE events.
 
 ```mermaid
-%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart TB
   client["OpenAI-format client"] --> gateway["dxgate"]
   gateway --> openai["OpenAI"]

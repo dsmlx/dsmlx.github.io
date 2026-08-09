@@ -3,7 +3,6 @@
 dxgate is the data plane and `dubbod` is its only control plane. Ordinary HTTP and AI backends enter one mesh configuration path.
 
 ```mermaid
-%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart LR
   subgraph cp["Control plane (external)"]
     direction TB

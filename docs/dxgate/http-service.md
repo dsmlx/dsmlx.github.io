@@ -3,7 +3,6 @@
 普通 HTTP 后端不创建 `DxgateService`。`HTTPRoute.backendRefs` 直接引用核心 Kubernetes `Service`，`dubbod` 把路由与端点编译为 xDS，dxgate 只负责转发。
 
 ```mermaid
-%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart TB
   client["Client"] --> gateway["dxgate"]
   gateway -->|"/users"| users["user-service:8080"]

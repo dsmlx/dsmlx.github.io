@@ -3,7 +3,6 @@
 OpenAI, Anthropic, and custom Agents can use the MCP endpoint exposed by dxgate as a remote tool server. dxgate handles routing, tool federation, authentication, RBAC, rate limits, and auditing; the model decides when to call a tool.
 
 ```mermaid
-%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart TB
   app["Application"] --> openai["OpenAI"]
   app --> anthropic["Anthropic"]

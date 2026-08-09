@@ -3,7 +3,6 @@
 OpenAI、Anthropic 或自建 Agent 都可以把 dxgate 暴露的 MCP endpoint 当成远程工具服务器。dxgate 负责路由、tool federation、认证、RBAC、限流和审计；模型负责决定何时调用工具。
 
 ```mermaid
-%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart TB
   app["Application"] --> openai["OpenAI"]
   app --> anthropic["Anthropic"]

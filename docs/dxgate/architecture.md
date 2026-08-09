@@ -3,7 +3,6 @@
 dxgate 是数据面，`dubbod` 是唯一控制面。普通 HTTP 后端与 AI 后端都从 Kubernetes API 进入同一条网格配置链。
 
 ```mermaid
-%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart LR
   subgraph cp["Control plane (external)"]
     direction TB

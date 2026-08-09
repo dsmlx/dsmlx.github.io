@@ -3,7 +3,6 @@
 dxgate faces A2A Servers. It does not turn OpenAI or Anthropic APIs into A2A Agents. Each Agent calls its own LLM; dxgate handles Agent Cards, JSON-RPC, policies, and task affinity.
 
 ```mermaid
-%%{init: {"themeVariables": {"fontSize": "18px"}}}%%
 flowchart TB
   client["A2A Client / Orchestrator"] --> gateway["dxgate"]
   gateway -->|"/openai"| openaiAgent["OpenAI Agent"]
