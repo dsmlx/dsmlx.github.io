@@ -1,6 +1,15 @@
-> 未完成撰写的文档，因为版本迭代过快，跟新版本会存在一定差异，后续会进行补充完善。
-
 Dubbo 安全基础架构负责工作负载身份、传输加密、请求认证和访问控制。mTLS（Mutual TLS）表示客户端和服务端使用证书互相校验身份；JWT（JSON Web Token）用于在 HTTP 请求中携带最终用户身份。
+
+## 执行链路
+
+安全能力按数据面实际职责拆分，不要求所有流量经过同一套过滤器：
+
+- `dubbod` 内置 CA 为接入网格的工作负载签发短期证书，持续轮换证书和根证书，并通过 bootstrap/SDS 配置交付给数据面。私钥只写入工作负载 Secret，不进入 xDS 运行时配置。
+- `dxproxy` 保护东西向 Inherent gRPC 入站流量：执行 `PeerAuthentication`，从已验证客户端证书的 URI SAN 提取 SPIFFE 身份，再执行基于 `principals` 的 `AuthorizationPolicy`。
+- `dxgate` 保护 Gateway API HTTP 流量：验证 JWT 签名、`issuer`、`audience` 和有效期，生成 `requestPrincipal`，再执行基于 `requestPrincipals` 与 `request.auth.claims[...]` 的 `AuthorizationPolicy`。
+- `dubbod` 按 namespace 和 workload selector 选择策略。无法由当前数据面可靠验证的字段不会被降级为更宽松的规则。
+
+认证失败或授权不匹配都在数据面直接拒绝。dxproxy 暴露 `dxproxy_authorization_denials_total`，dxgate 把拒绝计入 `policy_denied` 指标并记录请求失败日志。
 
 ## 对等认证
 
@@ -34,6 +43,28 @@ spec:
 出站 mTLS 不仅校验证书链，还固定对端身份：控制面在生成出站集群 TLS 配置时，会把目标服务背后工作负载的 SPIFFE 身份（由 namespace 与 ServiceAccount 推导）写入 `match_subject_alt_names`。持有同一 CA 签发证书的其他工作负载即使证书有效，也无法冒充目标服务。
 
 入站方向在传输层接受任何通过网格 CA 认证的身份，按调用方细分的访问限制交给 `AuthorizationPolicy` 表达。
+
+东西向授权使用证书中已经验证的 SPIFFE 身份：
+
+```yaml
+apiVersion: security.dubbo.apache.org/v1alpha3
+kind: AuthorizationPolicy
+metadata:
+  name: allow-orders-client
+  namespace: orders
+spec:
+  selector:
+    matchLabels:
+      app: orders
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/frontend/sa/frontend
+```
+
+存在任意 ALLOW 策略时，没有匹配 ALLOW 的调用会被默认拒绝；匹配 DENY 的调用始终优先拒绝。`principals: ["*"]` 只匹配经过 mTLS 验证且具有身份的连接，不会把宽容模式下的明文连接当成已认证调用方。
 
 ## 请求认证
 
@@ -81,3 +112,7 @@ spec:
       values:
       - group1
 ```
+
+## 当前边界
+
+当前必须具备且已经进入运行链路的是证书签发与轮换、mTLS、JWT、SPIFFE/JWT 主体授权、JWT 声明授权、ALLOW/DENY 和拒绝可观测性。外部授权、审计模拟、JWT 声明复制到请求头、来源 IP/Ingress 专用授权、信任域迁移兼容和可配置 TLS 最低版本不属于当前安全架构。

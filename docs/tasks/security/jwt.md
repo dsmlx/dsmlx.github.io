@@ -1,15 +1,13 @@
-> 目前属于设计完毕阶段，该任务需要使用示例，即将推出
-
-
-本任务演示如何为 `httpbin` 启用 JWT 请求认证，并通过 `AuthorizationPolicy` 要求请求携带指定用户身份和 `groups` 声明。
+本任务演示如何在托管 Gateway（dxgate）上为 `httpbin` 启用 JWT 请求认证，并通过 `AuthorizationPolicy` 要求请求携带指定用户身份和 `groups` 声明。JWT 校验发生在 HTTP 网关数据面，不发生在仅转发字节流的 dxproxy。
 
 ## 前提条件
 
+部署仓库中的 `httpbin`、Gateway 和 HTTPRoute，然后把本地端口转发到 dxgate：
+
 ```bash
-kubectl create ns foo
-kubectl label namespace foo dubbo-injection=enabled
-kubectl -n foo create deploy httpbin --image=docker.io/mccutchen/go-httpbin:2.19.0 --port=8080
-kubectl -n foo expose deploy httpbin --port=8000 --target-port=8080
+kubectl apply -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/samples/httpbin/httpbin.yaml
+kubectl rollout status deploy/dxgate-gateway
+kubectl port-forward svc/dxgate-gateway 18080:80
 ```
 
 ## 启用 JWT 请求认证
@@ -22,7 +20,7 @@ apiVersion: security.dubbo.apache.org/v1alpha3
 kind: RequestAuthentication
 metadata:
   name: jwt-example
-  namespace: foo
+  namespace: default
 spec:
   selector:
     matchLabels:
@@ -35,11 +33,10 @@ EOF
 
 `jwksUri` 必须是 `http`/`https` URL，相对路径会被校验 webhook 拒绝。离线环境可以改用内联 `jwks` 字段直接嵌入 JWKS 内容（与 `jwksUri` 二选一）。
 
-验证没有 JWT 的请求被允许：
+另开终端，验证没有 JWT 的请求被允许：
 
 ```bash
-kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 -- \
-  curl -s -o /dev/null -w "%{http_code}\n" http://httpbin.foo.svc.cluster.local:8000/get
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:18080/get
 ```
 
 预期返回 `200`。
@@ -47,10 +44,9 @@ kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 --
 验证无效 JWT 被拒绝：
 
 ```bash
-kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 -- \
-  curl -s -o /dev/null -w "%{http_code}\n" \
+curl -s -o /dev/null -w "%{http_code}\n" \
   -H "Authorization: Bearer invalid-token" \
-  http://httpbin.foo.svc.cluster.local:8000/get
+  http://127.0.0.1:18080/get
 ```
 
 预期不是 `200`。
@@ -71,7 +67,7 @@ apiVersion: security.dubbo.apache.org/v1alpha3
 kind: AuthorizationPolicy
 metadata:
   name: require-jwt
-  namespace: foo
+  namespace: default
 spec:
   selector:
     matchLabels:
@@ -88,10 +84,9 @@ EOF
 
 ```bash
 export TOKEN="<valid-jwt-with-testing-issuer-and-subject>"
-kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 -- \
-  curl -s -o /dev/null -w "%{http_code}\n" \
+curl -s -o /dev/null -w "%{http_code}\n" \
   -H "Authorization: Bearer $TOKEN" \
-  http://httpbin.foo.svc.cluster.local:8000/get
+  http://127.0.0.1:18080/get
 ```
 
 预期返回 `200`。
@@ -99,8 +94,7 @@ kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 --
 验证没有 JWT 的请求被拒绝：
 
 ```bash
-kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 -- \
-  curl -s -o /dev/null -w "%{http_code}\n" http://httpbin.foo.svc.cluster.local:8000/get
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:18080/get
 ```
 
 预期不是 `200`。
@@ -125,7 +119,7 @@ apiVersion: security.dubbo.apache.org/v1alpha3
 kind: AuthorizationPolicy
 metadata:
   name: require-jwt
-  namespace: foo
+  namespace: default
 spec:
   selector:
     matchLabels:
@@ -145,10 +139,9 @@ EOF
 
 ```bash
 export TOKEN_GROUP="<valid-jwt-with-group1-and-group2>"
-kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 -- \
-  curl -s -o /dev/null -w "%{http_code}\n" \
+curl -s -o /dev/null -w "%{http_code}\n" \
   -H "Authorization: Bearer $TOKEN_GROUP" \
-  http://httpbin.foo.svc.cluster.local:8000/get
+  http://127.0.0.1:18080/get
 ```
 
 预期返回 `200`。
@@ -157,10 +150,9 @@ kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 --
 
 ```bash
 export TOKEN_NO_GROUP="<valid-jwt-without-groups>"
-kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 -- \
-  curl -s -o /dev/null -w "%{http_code}\n" \
+curl -s -o /dev/null -w "%{http_code}\n" \
   -H "Authorization: Bearer $TOKEN_NO_GROUP" \
-  http://httpbin.foo.svc.cluster.local:8000/get
+  http://127.0.0.1:18080/get
 ```
 
 预期不是 `200`。
@@ -168,9 +160,7 @@ kubectl -n foo run curl --rm -i --restart=Never --image=curlimages/curl:8.5.0 --
 ## 清理
 
 ```bash
-kubectl -n foo delete requestauthentication jwt-example
-kubectl -n foo delete authorizationpolicy require-jwt
-kubectl -n foo delete deploy httpbin
-kubectl -n foo delete svc httpbin
-kubectl delete ns foo
+kubectl delete requestauthentication jwt-example
+kubectl delete authorizationpolicy require-jwt
+kubectl delete -f https://raw.githubusercontent.com/apache/dubbo-kubernetes/master/samples/httpbin/httpbin.yaml
 ```
