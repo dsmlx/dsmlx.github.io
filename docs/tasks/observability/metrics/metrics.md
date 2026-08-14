@@ -1,18 +1,19 @@
 # 指标
 
-dubbod 暴露控制面运行状态和 xDS 指标。托管 Gateway 的 dxgate 暴露请求数、失败数、并发和延迟指标。
+Telemetry API 控制 Inherent Client 和 Server 的指标生成规则。
+规则由 Inherent 运行时在应用进程内执行，不创建代理工作负载。
 
 ## 前提
 
-已安装 dubbod，并且集群中有托管 `Gateway` 和至少一个 `HTTPRoute`。
+已安装 dubbod，并且工作负载已启用 Inherent 模式。
 
 ## 开启指标
 
-Telemetry API 决定托管工作负载是否暴露指标。下面配置在网格范围启用 Prometheus provider：
+下面配置在网格范围启用 Prometheus，并从 Client 和 Server 的请求计数中移除 `grpc_response_status` 标签：
 
 ```bash
 cat <<EOF | kubectl apply -f -
-apiVersion: telemetry.dubbo.apache.org/v1alpha1
+apiVersion: telemetry.dubbo.apache.org/v1alpha3
 kind: Telemetry
 metadata:
   name: metrics-tags
@@ -21,6 +22,12 @@ spec:
   metrics:
   - providers:
     - name: prometheus
+    rules:
+    - metric: REQUEST_COUNT
+      scope: CLIENT_AND_SERVER
+      tags:
+        grpc_response_status:
+          action: REMOVE
 EOF
 ```
 
@@ -28,7 +35,7 @@ EOF
 
 ```bash
 cat <<EOF | kubectl apply -f -
-apiVersion: telemetry.dubbo.apache.org/v1alpha1
+apiVersion: telemetry.dubbo.apache.org/v1alpha3
 kind: Telemetry
 metadata:
   name: metrics-tags
@@ -50,7 +57,7 @@ kubectl apply -f samples/addons/grafana.yaml
 
 ## 产生流量
 
-请求必须经过托管 Gateway：
+调用 Inherent 服务：
 
 ```bash
 curl http://$GATEWAY_URL/payment
