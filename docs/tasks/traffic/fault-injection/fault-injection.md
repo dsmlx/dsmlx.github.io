@@ -49,7 +49,7 @@ kubectl get faultinjectionpolicy httpbin-fault-injection -o yaml
 
 `targetRefs[].sectionName` 可以指定 Service 端口名；省略时策略作用于该 Service 的全部端口。同一目标存在多个策略时，控制面采用创建时间最早的有效策略，端口级策略优先于 Service 级策略。
 
-## 验证 Proxyless 出站
+## 验证 Inherent 出站
 
 把 dubbod 的测试入口转发到本地：
 
@@ -67,13 +67,13 @@ grpcurl -plaintext \
 
 命中延迟时，调用至少增加 250 毫秒；命中中止时，客户端返回 `fault injected HTTP status 503`，且不会访问上游。故障在重试逻辑之前执行，因此本地注入的中止不会被自动重试。
 
-## 入站 dxplane 语义
+## 入站 dxproxy 语义
 
-控制面也会把同一策略写入目标工作负载的 dxplane runtime 配置。dxplane 在建立到本地应用的连接前执行故障：
+控制面也会把同一策略写入目标工作负载的 dxproxy runtime 配置。dxproxy 在建立到本地应用的连接前执行故障：
 
-- 延迟会暂停选中的入站连接，并增加 `dxplane_fault_delays_total`。
-- 中止会直接关闭选中的连接，并增加 `dxplane_fault_aborts_total`。
-- dxplane 是 L4 数据面，不终止 HTTP/gRPC 协议，因此不能合成配置的 HTTP 状态码；`httpStatus` 只用于配置校验与 L7 Proxyless 出站返回。
+- 延迟会暂停选中的入站连接，并增加 `dxproxy_fault_delays_total`。
+- 中止会直接关闭选中的连接，并增加 `dxproxy_fault_aborts_total`。
+- dxproxy 是 L4 数据面，不终止 HTTP/gRPC 协议，因此不能合成配置的 HTTP 状态码；`httpStatus` 只用于配置校验与 L7 Inherent 出站返回。
 
 ## 参数规则
 

@@ -1,6 +1,6 @@
 # 请求重试
 
-本任务使用 Gateway API `HTTPRoute.rules[].retry` 为服务间 Proxyless 出站请求配置自动重试。控制面会把策略转换成 xDS RDS `RouteAction.RetryPolicy`，数据面在连接失败、连接重置或命中指定 HTTP 状态码时重新选择端点。
+本任务使用 Gateway API `HTTPRoute.rules[].retry` 为服务间 Inherent 出站请求配置自动重试。控制面会把策略转换成 xDS RDS `RouteAction.RetryPolicy`，数据面在连接失败、连接重置或命中指定 HTTP 状态码时重新选择端点。
 
 ## 前提
 
@@ -84,7 +84,7 @@ grpcurl -plaintext \
   :17171 proto.XDSTestService/ForwardHTTP | jq -r '.output | join("")'
 ```
 
-正常情况下输出会来自 `reviews-v1` 和 `reviews-v2`。验证重试时，让一个测试后端返回配置中的 `503`，或让首选测试端点拒绝连接；Proxyless outbound 客户端会在总请求超时内选择下一个端点。把返回码改成未配置的 `501` 时，不会触发状态码重试。
+正常情况下输出会来自 `reviews-v1` 和 `reviews-v2`。验证重试时，让一个测试后端返回配置中的 `503`，或让首选测试端点拒绝连接；Inherent outbound 客户端会在总请求超时内选择下一个端点。把返回码改成未配置的 `501` 时，不会触发状态码重试。
 
 ## 语义与边界
 
@@ -93,7 +93,7 @@ grpcurl -plaintext \
 - `timeouts.request` 是整个逻辑请求的时间预算，包含退避等待；预算耗尽后立即取消后续尝试。
 - `timeouts.backendRequest` 是每一次上游调用的独立超时。
 - `CircuitBreakerPolicy.connectionPool.maxRetries` 是并发重试容量上限，不是重试触发策略。
-- 当前 HTTPRoute 重试执行面是项目提供的 Proxyless outbound 数据面；入站 L4 `dxplane` 不终止 HTTP/gRPC 协议，因此不会重放应用请求。
+- 当前 HTTPRoute 重试执行面是项目提供的 Inherent outbound 数据面；入站 L4 `dxproxy` 不终止 HTTP/gRPC 协议，因此不会重放应用请求。
 
 ## 清理
 

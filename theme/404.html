@@ -1,0 +1,46 @@
+{#- Standalone 404 page. GitHub Pages serves this at arbitrary paths, so all
+    links are site-absolute and no page context is assumed. -#}
+<!DOCTYPE html>
+<html lang="zh" data-md-color-scheme="default">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>404 - {{ config.site_name }}</title>
+  <link rel="icon" href="{{ config.theme['favicon'] | url }}">
+  <style>
+    html { color-scheme: light; }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      {#- Self-contained: this page loads no stylesheet, so the site-wide
+          Monaco-first stack is repeated here rather than referenced. -#}
+      font-family: Monaco, Menlo, Consolas, "Liberation Mono", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", ui-monospace, "Noto Sans", system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(110% 65% at 82% -10%, rgba(29, 91, 196, 0.07), transparent 55%),
+        linear-gradient(180deg, #E3EBF6 0%, #EFF3F9 58%);
+      background-attachment: fixed;
+      color: #1A2332;
+      text-align: center;
+    }
+    .kd-404 h1 { font-size: 3rem; margin: 0 0 0.5rem; font-weight: 600; }
+    .kd-404 p { color: #636F80; margin: 0 0 1.5rem; }
+    .kd-404 a {
+      color: #1D5BC4;
+      text-decoration: none;
+      border-bottom: 1px solid #1D5BC4;
+      padding-bottom: 1px;
+    }
+    .kd-404 a:hover { color: #1749A3; border-bottom-color: #1749A3; }
+  </style>
+</head>
+<body>
+  <div class="kd-404">
+    <h1>404</h1>
+    <p>页面不存在 / Page not found</p>
+    <a href="/">返回首页 · Back to home</a>
+  </div>
+</body>
+</html>

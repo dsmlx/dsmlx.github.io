@@ -1,31 +1,6 @@
 /* custom.js — small progressive enhancements. Smooth anchor scrolling is CSS
    (scroll-behavior) so URL hashes and history keep working. */
 document.addEventListener('DOMContentLoaded', function () {
-  // === Reading progress bar (doc pages only) ===
-  // A 2px accent line under the header tracks scroll position. The homepage
-  // renders its own chrome (.kd-home) and is skipped.
-  if (!document.querySelector('.kd-home')) {
-    const header = document.querySelector('.md-header');
-    if (header) {
-      const bar = document.createElement('div');
-      bar.className = 'kd-progress';
-      bar.setAttribute('aria-hidden', 'true');
-      header.appendChild(bar);
-
-      let ticking = false;
-      const update = () => {
-        const doc = document.documentElement;
-        const max = doc.scrollHeight - doc.clientHeight;
-        bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(doc.scrollTop / max, 1) : 0) + ')';
-        ticking = false;
-      };
-      window.addEventListener('scroll', () => {
-        if (!ticking) { ticking = true; requestAnimationFrame(update); }
-      }, { passive: true });
-      update();
-    }
-  }
-
   // === TOC collapsible groups ===
   // On pages with many h2 sections (e.g. release notes), let top-level TOC
   // entries collapse their h3 children. The toggle is a separate control so
@@ -47,7 +22,9 @@ document.addEventListener('DOMContentLoaded', function () {
       toggle.className = 'toc-toggle';
       toggle.setAttribute('role', 'button');
       toggle.setAttribute('tabindex', '0');
-      toggle.style.cssText = 'cursor:pointer;margin-right:0.3em;font-size:0.7em;user-select:none;';
+      // Positioned by CSS (.toc-toggle) into the heading's left gutter so it
+      // never shifts the h2 text; only look/interaction styles are set here.
+      toggle.style.cssText = 'cursor:pointer;font-size:0.6em;user-select:none;line-height:1;';
 
       const apply = () => {
         nestedNav.style.display = collapsed ? 'none' : '';

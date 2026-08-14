@@ -1,0 +1,325 @@
+{#- Kdubbo standalone theme — no MkDocs Material dependency.
+    Keeps the Material class vocabulary (.md-header, .md-nav, .md-typeset …)
+    so the existing skin (docs/assets/overrides.css) applies unchanged.
+    Layout: condensed single-row header; the former nav tabs live in the
+    left sidebar as collapsible sections. -#}
+
+{#- Recursive sidebar renderer. Groups collapse via hidden checkboxes;
+    the active trail is expanded. A group whose first child is its index
+    page becomes a linked section header (.md-nav__container). -#}
+{%- macro nav_item(item, id) %}
+  {%- if item.children %}
+    {%- set index_child = item.children | first if (item.children | first).is_page and (item.children | first).is_index else none %}
+    {%- set linked_index_child = index_child if item.title not in ['安全', 'Security'] else none %}
+    <li class="md-nav__item md-nav__item--nested{% if item.active %} md-nav__item--active{% endif %}">
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__nav-{{ id }}"{% if item.active %} checked{% endif %}>
+      {%- if linked_index_child %}
+      <div class="md-nav__container">
+        <a href="{{ linked_index_child.url | url }}" class="md-nav__link"{% if linked_index_child == page %} aria-current="page"{% endif %}>{{ item.title }}</a>
+        <label class="md-nav__link md-nav__chevron" for="__nav-{{ id }}" aria-label="{{ item.title }}"><span class="md-nav__icon md-icon"></span></label>
+      </div>
+      {%- else %}
+      <label class="md-nav__link" for="__nav-{{ id }}">{{ item.title }}<span class="md-nav__icon md-icon"></span></label>
+      {%- endif %}
+      <nav class="md-nav" aria-label="{{ item.title }}">
+        <ul class="md-nav__list">
+          {%- for child in item.children %}
+          {%- set hide_security_overview = item.title in ['认证', 'Authentication', '证书管理', 'Certificate Management', '授权', 'Authorization', 'TLS 配置', 'TLS Configuration'] and child.title in ['概览', 'Overview'] %}
+          {%- if not (index_child and loop.first) and not hide_security_overview %}
+          {{ nav_item(child, id ~ '-' ~ loop.index) }}
+          {%- endif %}
+          {%- endfor %}
+        </ul>
+      </nav>
+    </li>
+  {%- else %}
+    <li class="md-nav__item{% if item.active %} md-nav__item--active{% endif %}">
+      <a href="{{ item.url | url }}" class="md-nav__link"{% if item == page %} aria-current="page"{% endif %}>{{ item.title }}</a>
+    </li>
+  {%- endif %}
+{%- endmacro %}
+
+{%- macro toc_item(tok) %}
+  <li class="md-nav__item">
+    <a href="{{ tok.url }}" class="md-nav__link">{{ tok.title }}</a>
+    {%- if tok.children %}
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        {%- for child in tok.children %}
+        {{ toc_item(child) }}
+        {%- endfor %}
+      </ul>
+    </nav>
+    {%- endif %}
+  </li>
+{%- endmacro %}
+
+{%- set locale = i18n_page_locale | default('zh') -%}
+{%- set is_en = locale == 'en' -%}
+{%- set zh_path = page.url[3:] if page.url.startswith('en/') else page.url -%}
+{%- set en_path = 'en/' ~ zh_path -%}
+{%- set hidden = page.meta.hide | default([]) -%}
+{%- set on_release = ('/' ~ page.url).endswith('/latest/release/') -%}
+{#- dxgate 是独立文档集：不进主文档树，自带一份分组侧边导航 -#}
+{%- set in_dxgate = zh_path.startswith('dxgate/') -%}
+{%- set dxgate_nav = [
+  ('Concepts' if is_en else '概念', [
+    ('dxgate/', 'What is dxgate' if is_en else 'dxgate 是什么'),
+    ('dxgate/architecture/', 'Architecture' if is_en else '网关架构'),
+  ]),
+  ('Service routing' if is_en else '服务路由', [
+    ('dxgate/http-service/', 'Ordinary Service' if is_en else '普通 Service'),
+  ]),
+  ('LLM', [
+    ('dxgate/llm/', 'LLM routing' if is_en else 'LLM 路由'),
+  ]),
+  ('MCP', [
+    ('dxgate/mcp/', 'MCP routing' if is_en else 'MCP 路由'),
+  ]),
+  ('Agent', [
+    ('dxgate/a2a/', 'A2A forwarding' if is_en else 'A2A 转发'),
+  ]),
+] -%}
+<!DOCTYPE html>
+<html lang="{{ 'en' if is_en else 'zh' }}" data-md-color-scheme="default">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {%- if page.is_homepage %}
+  <title>{{ config.site_name }}</title>
+  {%- else %}
+  <title>{{ page.title }} - {{ config.site_name }}</title>
+  {%- endif %}
+  {%- if config.site_url %}
+  <link rel="canonical" href="{{ page.canonical_url }}">
+  {%- endif %}
+  <link rel="icon" href="{{ config.theme['favicon'] | url }}">
+  <meta name="generator" content="mkdocs-{{ mkdocs_version }}">
+  <link rel="stylesheet" href="{{ 'assets/kd-theme.css' | url }}?v=20260814-r1">
+  {%- for path in config.extra_css %}
+  <link rel="stylesheet" href="{{ path | url }}">
+  {%- endfor %}
+  <script id="__config" type="application/json">{"base": "{{ base_url }}", "lang": "{{ 'en' if is_en else 'zh' }}"}</script>
+  {% block extrahead %}{% endblock %}
+</head>
+<body dir="ltr">
+
+<aside class="kd-build-notice" role="status" aria-label="{{ 'Documentation status' if is_en else '文档状态' }}">
+  <span>
+    {{ 'Documentation is under construction. All content is currently unavailable. A new version is coming soon.' if is_en else '文档当前处于建设阶段，所有内容均不可用，新版本即将推出。' }}
+  </span>
+</aside>
+
+<input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+<input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+<label class="md-overlay" for="__drawer"></label>
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="{{ config.site_name }}">
+    <a href="{{ nav.homepage.url | url }}" class="md-header__button md-logo" aria-label="{{ config.site_name }}">
+      <img src="{{ config.theme['logo'] | url }}" alt="logo">
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="{{ 'Menu' if is_en else '菜单' }}">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title">
+      <div class="md-header__ellipsis">
+        <span class="md-header__topic">{{ config.site_name }}</span>
+      </div>
+    </div>
+    <div class="md-header__spacer"></div>
+    {%- set lp = 'en/' if is_en else '' %}
+    {%- set is_home = page.is_homepage or page.meta.template | default('') == 'home.html' %}
+    {%- if is_home %}
+    {#- Homepage chrome: language switch, 消息, 文档 — nothing else -#}
+    <div class="md-header__option">
+      <div class="md-select">
+        <button class="md-header__button md-icon" aria-label="{{ 'Language' if is_en else '语言' }}">
+          <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z"/></svg>
+        </button>
+        <div class="md-select__inner">
+          <ul class="md-select__list">
+            <li class="md-select__item">
+              <a href="{{ (zh_path or './') | url }}" hreflang="zh" class="md-select__link">简体中文</a>
+            </li>
+            <li class="md-select__item">
+              <a href="{{ en_path | url }}" hreflang="en" class="md-select__link">English</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <nav class="kd-topnav" aria-label="{{ 'Site' if is_en else '站点' }}">
+      {#- 关于：只挂 dxgate 一条，进入独立的网关文档 -#}
+      <div class="kd-topnav__menu">
+        <button class="kd-topnav__link kd-topnav__trigger" type="button" aria-haspopup="true" aria-expanded="false">
+          {{ 'About' if is_en else '关于' }}<span class="kd-topnav__caret" aria-hidden="true"></span>
+        </button>
+        <div class="kd-topnav__panel">
+          <div class="kd-topnav__panel-inner">
+            <a class="kd-topnav__panel-link" href="{{ (lp ~ 'dxgate/') | url }}">
+              <span class="kd-topnav__panel-title">{{ 'Gateway Data Plane' if is_en else '网关数据面' }}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <a class="kd-topnav__link" href="{{ (lp ~ 'latest/release/') | url }}">{{ 'News' if is_en else '消息' }}</a>
+      <a class="kd-topnav__link" href="{{ (lp ~ 'overview/') | url }}">{{ 'Docs' if is_en else '文档' }}</a>
+      <a class="kd-topnav__link" href="https://github.com/apache/dubbo-website" target="_blank" rel="noopener">{{ 'Community' if is_en else '社区' }}</a>
+      <a class="kd-topnav__link" href="{{ (lp ~ 'models/') | url }}">{{ 'Models' if is_en else '模型' }}</a>
+      <a class="kd-topnav__icon" href="{{ config.repo_url }}" target="_blank" rel="noopener" aria-label="GitHub">
+        <svg viewBox="0 0 24 24"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2 0 1.9 1.2 1.9 1.2 1 1.8 2.8 1.3 3.5 1 0-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 0-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8 0 3.2.9.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.5.4.9 1 .9 2.2v3.3c0 .3.1.7.8.6A12 12 0 0 0 12 .3Z"/></svg>
+      </a>
+    </nav>
+    {%- else %}
+    {#- Doc-page chrome: a single search control -#}
+    <div class="md-search" role="search">
+      <div class="md-search__inner">
+        <form class="md-search__form" autocomplete="off" onsubmit="return false">
+          <input type="search" class="md-search__input" name="query" aria-label="{{ 'Search' if is_en else '搜索' }}"
+                 placeholder="{{ 'Search' if is_en else '搜索' }}" autocapitalize="off" autocorrect="off" spellcheck="false">
+          <label class="md-search__icon md-icon" for="__search" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+          </label>
+        </form>
+        <div class="md-search__output">
+          <div class="md-search__scrollwrap">
+            <div class="md-search-result">
+              <ol class="md-search-result__list" role="presentation"></ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {%- endif %}
+  </nav>
+</header>
+
+{% block tabs %}{% endblock %}
+
+<div class="md-container" data-md-component="container">
+  <main class="md-main" data-md-component="main">
+    <div class="md-main__inner md-grid">
+
+      {%- if in_dxgate %}
+      <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--primary kd-nav--standalone" aria-label="dxgate">
+              <ul class="md-nav__list" data-md-scrollfix>
+                {%- for group, items in dxgate_nav %}
+                {%- set group_active = items | selectattr(0, 'equalto', zh_path) | list | length > 0 %}
+                <li class="md-nav__item md-nav__item--nested{% if group_active %} md-nav__item--active{% endif %}">
+                  <input class="md-nav__toggle md-toggle" type="checkbox" id="__nav-dx{{ loop.index }}"{% if group_active %} checked{% endif %}>
+                  <label class="md-nav__link" for="__nav-dx{{ loop.index }}">{{ group }}<span class="md-nav__icon md-icon"></span></label>
+                  <nav class="md-nav" aria-label="{{ group }}">
+                    <ul class="md-nav__list">
+                      {%- for href, title in items %}
+                      <li class="md-nav__item{% if zh_path == href %} md-nav__item--active{% endif %}">
+                        <a href="{{ (lp ~ href) | url }}" class="md-nav__link"{% if zh_path == href %} aria-current="page"{% endif %}>{{ title }}</a>
+                      </li>
+                      {%- endfor %}
+                    </ul>
+                  </nav>
+                </li>
+                {%- endfor %}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+      {#- 消息（公告栏）不属于文档内容，不显示文档树 -#}
+      {%- elif 'navigation' not in hidden and not on_release %}
+      <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--primary" aria-label="{{ 'Navigation' if is_en else '导航' }}">
+              <ul class="md-nav__list" data-md-scrollfix>
+                {#- 公告栏 lives under the header's 消息 link, not in the doc tree -#}
+                {%- for item in nav %}
+                {%- if not (item.is_page and item.url.endswith('latest/release/')) %}
+                {{ nav_item(item, 'n' ~ loop.index) }}
+                {%- endif %}
+                {%- endfor %}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+      {%- endif %}
+
+      {%- set toc_items = page.toc %}
+      {%- if toc_items | length == 1 and toc_items | first and (toc_items | first).level == 1 %}
+        {%- set toc_items = (toc_items | first).children %}
+      {%- endif %}
+      {%- if 'toc' not in hidden and toc_items %}
+      <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+        <div class="md-sidebar__scrollwrap">
+          <div class="md-sidebar__inner">
+            <nav class="md-nav md-nav--secondary" aria-label="{{ 'Table of contents' if is_en else '目录' }}">
+              <span class="md-nav__title">{{ 'On this page' if is_en else '本页目录' }}</span>
+              <ul class="md-nav__list">
+                {%- for tok in toc_items %}
+                {{ toc_item(tok) }}
+                {%- endfor %}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+      {%- endif %}
+
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset{% if on_release %} kd-release{% endif %}">
+          {% block content %}
+          {{ page.content }}
+          {% endblock %}
+        </article>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+{% block footer %}
+<footer class="md-footer">
+  {%- if page.previous_page or page.next_page %}
+  <nav class="md-footer__inner md-grid" aria-label="{{ 'Footer' if is_en else '页脚' }}">
+    {%- if page.previous_page %}
+    <a href="{{ page.previous_page.url | url }}" class="md-footer__link md-footer__link--prev" rel="prev">
+      <div class="md-footer__button md-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </div>
+      <div class="md-footer__title">
+        <span class="md-footer__direction">{{ 'Previous' if is_en else '上一页' }}</span>
+        <div class="md-ellipsis">{{ page.previous_page.title }}</div>
+      </div>
+    </a>
+    {%- endif %}
+    {%- if page.next_page %}
+    <a href="{{ page.next_page.url | url }}" class="md-footer__link md-footer__link--next" rel="next">
+      <div class="md-footer__title">
+        <span class="md-footer__direction">{{ 'Next' if is_en else '下一页' }}</span>
+        <div class="md-ellipsis">{{ page.next_page.title }}</div>
+      </div>
+      <div class="md-footer__button md-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+      </div>
+    </a>
+    {%- endif %}
+  </nav>
+  {%- endif %}
+  <div class="md-footer-meta">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">{{ config.copyright }}</div>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+
+<script src="{{ 'assets/kd-theme.js' | url }}?v=20260726-r2"></script>
+{%- for path in config.extra_javascript %}
+<script src="{{ path | url }}"></script>
+{%- endfor %}
+</body>
+</html>

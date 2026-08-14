@@ -6,7 +6,7 @@
 
 南北向请求已经经过托管 Gateway，dxgate 可直接扣住冷请求。
 
-东西向 proxyless 调用平时由调用方直接连接 EDS 端点。目标缩到零时，`dubbod` 不下发空 EDS，而是临时把端点切到同命名空间专用 Activator Gateway `dxgate-gateway`。Activator 根据原始 Host 扣住请求；后端 Ready 后 EDS 恢复真实端点，新请求重新走直连热路径。
+东西向 Inherent 调用平时由调用方直接连接 EDS 端点。目标缩到零时，`dubbod` 不下发空 EDS，而是临时把端点切到同命名空间专用 Activator Gateway `dxgate-gateway`。Activator 根据原始 Host 扣住请求；后端 Ready 后 EDS 恢复真实端点，新请求重新走直连热路径。
 
 因此 HTTP 和 unary gRPC 的入口及网格内调用都可以缩到零；流式 RPC、长连接和无法重放的请求仍应保持至少一个副本。
 

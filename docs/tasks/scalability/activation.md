@@ -1,6 +1,6 @@
 # 配置按需激活
 
-本任务把 HTTP/unary gRPC Service 缩到零，并验证南北向或 proxyless 东西向的首个请求能完成。概念背景见[按需激活](../../concepts/scalability.md)。
+本任务把 HTTP/unary gRPC Service 缩到零，并验证南北向或 Inherent 东西向的首个请求能完成。概念背景见[按需激活](../../concepts/scalability.md)。
 
 ## 1. 安装 KEDA
 
@@ -72,7 +72,7 @@ kubectl -n activation get deploy payment -w
 time curl -s http://$GATEWAY/payment/healthz
 ```
 
-请求在冷启动期间等待并最终成功。东西向验证可从注入的 proxyless 客户端调用 `payment.activation.svc.cluster.local`；冷时经过 Activator，热 EDS 收敛后直接访问后端。
+请求在冷启动期间等待并最终成功。东西向验证可从注入的 Inherent 客户端调用 `payment.activation.svc.cluster.local`；冷时经过 Activator，热 EDS 收敛后直接访问后端。
 
 查看 Activator：
 

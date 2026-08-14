@@ -2,7 +2,7 @@
 
 本章介绍某个治理能力目前能不能用、由哪个 API 配置、依赖数据面的什么支持。
 
-Proxyless 架构下，策略在应用进程内执行，因此每项能力同时受两端约束：
+Inherent 架构下，策略在应用进程内执行，因此每项能力同时受两端约束：
 
 1. **控制面**：dubbod 是否已将该配置 API 翻译为 [xDS](https://github.com/kdubbo/xds-api) wire 协议资源；
 2. **数据面**：应用侧 xDS 客户端是否实现了对应的 filter / 路由 / LB 语义。
@@ -19,10 +19,10 @@ Proxyless 架构下，策略在应用进程内执行，因此每项能力同时�
 | 路由匹配 | HTTPRoute    | RDS RouteMatch | 支持 |
 | 加权流量转移（金丝雀） | HTTPRoute backendRefs weight | RDS WeightedCluster | 支持 |
 | 请求超时 | HTTPRoute    | RDS RouteAction.Timeout | 支持 |
-| 请求重试 | HTTPRoute rules[].retry + timeouts.backendRequest | RDS RouteAction.RetryPolicy | 支持（Proxyless outbound） |
+| 请求重试 | HTTPRoute rules[].retry + timeouts.backendRequest | RDS RouteAction.RetryPolicy | 支持（Inherent outbound） |
 | 熔断 | CircuitBreakerPolicy | 入站侧下发（grpc-inbound） | 支持 |
 | Ingress / Egress 网关 | Gateway API Gateway + HTTPRoute | 网关 Deployment 由控制面托管 | 支持 |
-| 故障注入 | FaultInjectionPolicy | RDS RouteAction.FaultPolicy + dxplane runtime config | 支持（Proxyless outbound L7；dxplane inbound L4） |
+| 故障注入 | FaultInjectionPolicy | RDS RouteAction.FaultPolicy + dxproxy runtime config | 支持（Inherent outbound L7；dxproxy inbound L4） |
 | EDS 地域分组与端点权重 | WorkloadEntry | EDS LocalityLbEndpoints + endpoint weight | 发布；就近选择取决于数据面 LB |
 
 ## 安全
@@ -41,12 +41,12 @@ Proxyless 架构下，策略在应用进程内执行，因此每项能力同时�
 | 能力 | 配置 API | 说明         | 状态 |
 |---|---|------------|---|
 | 控制面指标 | — | :8080/metrics | 支持 |
-| 网格指标 / 链路追踪 / 日志 | Telemetry + observability profile | 任务 → 可观测性  | 支持 |
+| 网格指标 / 链路追踪 / 日志 | Telemetry + `samples/addons` | 任务 → 可观测性  | 支持 |
 | 内嵌 GUI | — | overview / logs / metrics 视图 | 支持 |
 
 ## 可伸缩性
 
-按需激活只覆盖可安全等待和重放的 HTTP、unary gRPC 请求。南北向由入口 Gateway 扣住冷请求；proxyless 东西向由 `dubbod` 把冷服务 EDS 临时切到专用 Activator，后端就绪后恢复真实端点。
+按需激活只覆盖可安全等待和重放的 HTTP、unary gRPC 请求。南北向由入口 Gateway 扣住冷请求；Inherent 东西向由 `dubbod` 把冷服务 EDS 临时切到专用 Activator，后端就绪后恢复真实端点。
 
 | 能力 | 配置 API | 下发形式 | 状态 |
 |---|---|---|---|

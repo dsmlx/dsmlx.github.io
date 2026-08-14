@@ -77,7 +77,7 @@ spec:
 使用 `HTTPRoute` 规则的 `timeouts.request` 字段设置请求超时，控制面会转换成 xDS 路由超时。详见[请求超时任务](../tasks/traffic/request-timeouts/request-timeouts.md)。
 
 ### 重试
-服务间的 Proxyless 出站请求使用 Gateway API `HTTPRoute.rules[].retry` 声明重试。控制面将重试次数、状态码、单次请求超时和退避转换成 RDS `RouteAction.RetryPolicy`；数据面在连接失败、连接重置或命中指定状态码时选择下一个可用端点重试。
+服务间的 Inherent 出站请求使用 Gateway API `HTTPRoute.rules[].retry` 声明重试。控制面将重试次数、状态码、单次请求超时和退避转换成 RDS `RouteAction.RetryPolicy`；数据面在连接失败、连接重置或命中指定状态码时选择下一个可用端点重试。
 
 `retry` 是 Gateway API 的 Extended/Experimental 字段，需要安装对应版本的 `experimental-install.yaml`。`attempts` 表示初次请求之后最多重试多少次，不包含初次请求。`timeouts.request` 限制整个请求及全部重试的总时间，`timeouts.backendRequest` 限制每一次上游尝试。详见[请求重试任务](../tasks/traffic/request-retries/request-retries.md)。
 
@@ -88,11 +88,11 @@ spec:
 熔断通过 `CircuitBreakerPolicy` 以 Gateway API policy attachment 模型附着到 `Service`，包含连接池限制（`maxConnections`、`http2MaxRequests` 等）和被动异常摘除（`outlierDetection`）两组参数，当前对托管网关（dxgate）流量生效。详见[熔断任务](../tasks/traffic/circuit-breaking/circuit-breaking.md)。
 
 ### 故障注入
-故障注入通过 `FaultInjectionPolicy` 以 Gateway API policy attachment 模型附着到 `Service`，支持按百分比注入固定延迟和 HTTP 中止。控制面将策略写入 RDS 与工作负载 runtime 配置：Proxyless 出站在请求级执行并返回配置的 HTTP 状态，dxplane 入站在连接级执行延迟或断连。详见[故障注入任务](../tasks/traffic/fault-injection/fault-injection.md)。
+故障注入通过 `FaultInjectionPolicy` 以 Gateway API policy attachment 模型附着到 `Service`，支持按百分比注入固定延迟和 HTTP 中止。控制面将策略写入 RDS 与工作负载 runtime 配置：Inherent 出站在请求级执行并返回配置的 HTTP 状态，dxproxy 入站在连接级执行延迟或断连。详见[故障注入任务](../tasks/traffic/fault-injection/fault-injection.md)。
 
 ### 能力边界
 
-服务间（proxyless）路径的可配置能力受 xDS 传输协议约束：加权分流、路径/Header 匹配、请求超时、请求重试、故障注入、负载均衡策略与 mTLS/SAN 校验已支持；连接池熔断、异常摘除、Header 改写与限流仍需要数据面 SDK 支持，属于路线图项。当前重试与 L7 故障注入执行面是项目提供的 Proxyless outbound 数据面；dxplane 只提供入站 L4 延迟与断连，托管网关的普通 HTTPRoute 转发暂不复用该策略。`CircuitBreakerPolicy.connectionPool.maxRetries` 只限制并发重试容量，不会主动触发重试。
+服务间（Inherent）路径的可配置能力受 xDS 传输协议约束：加权分流、路径/Header 匹配、请求超时、请求重试、故障注入、负载均衡策略与 mTLS/SAN 校验已支持；连接池熔断、异常摘除、Header 改写与限流仍需要数据面 SDK 支持，属于路线图项。当前重试与 L7 故障注入执行面是项目提供的 Inherent outbound 数据面；dxproxy 只提供入站 L4 延迟与断连，托管网关的普通 HTTPRoute 转发暂不复用该策略。`CircuitBreakerPolicy.connectionPool.maxRetries` 只限制并发重试容量，不会主动触发重试。
 
 ## 网关
 

@@ -6,7 +6,7 @@ On-demand activation lets an HTTP or unary gRPC service scale to zero while idle
 
 A north-south request already crosses a managed Gateway, where dxgate can hold it directly.
 
-A proxyless east-west caller normally connects directly to EDS endpoints. When the target reaches zero, `dubbod` publishes the namespace's dedicated Activator Gateway, `dxgate-gateway`, instead of empty EDS. The Activator holds the request by its original Host. When the backend becomes Ready, EDS returns to real endpoints and new requests resume the direct hot path.
+A Inherent east-west caller normally connects directly to EDS endpoints. When the target reaches zero, `dubbod` publishes the namespace's dedicated Activator Gateway, `dxgate-gateway`, instead of empty EDS. The Activator holds the request by its original Host. When the backend becomes Ready, EDS returns to real endpoints and new requests resume the direct hot path.
 
 Both ingress and in-mesh HTTP or unary gRPC calls can therefore scale to zero. Streaming RPCs, long-lived connections, and non-replayable requests must retain at least one replica.
 

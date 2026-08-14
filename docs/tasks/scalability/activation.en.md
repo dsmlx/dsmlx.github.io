@@ -1,6 +1,6 @@
 # Configure on-demand activation
 
-This task scales an HTTP/unary gRPC Service to zero and verifies that its first north-south or proxyless east-west request completes. See [on-demand activation](../../concepts/scalability.md) for the model.
+This task scales an HTTP/unary gRPC Service to zero and verifies that its first north-south or Inherent east-west request completes. See [on-demand activation](../../concepts/scalability.md) for the model.
 
 ## 1. Install KEDA
 
@@ -72,7 +72,7 @@ Status should contain `Accepted=True`, `Eligible=True`, `ScalerReady=True`, and 
 time curl -s http://$GATEWAY/payment/healthz
 ```
 
-It waits through cold start and succeeds. For east-west verification, call `payment.activation.svc.cluster.local` from an injected proxyless client. Cold traffic crosses the Activator; after hot EDS converges it reaches the backend directly.
+It waits through cold start and succeeds. For east-west verification, call `payment.activation.svc.cluster.local` from an injected Inherent client. Cold traffic crosses the Activator; after hot EDS converges it reaches the backend directly.
 
 Inspect the Activator:
 

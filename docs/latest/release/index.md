@@ -95,7 +95,7 @@
     发布日期：2026-04-29
 
     - 修复 KRT（Kubernetes Runtime）已知问题
-    - 修复 Proxyless gRPC 已知问题
+    - 修复 Inherent gRPC 已知问题
     - 修复 XDS 已知问题
     - 补全 Helm 模板缺失内容及其他问题
     - 新增负载测试与 e2e 测试

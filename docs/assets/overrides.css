@@ -5,9 +5,9 @@
    flat: 1px hairlines, no shadows on structural surfaces. */
 
 :root {
-  /* Fonts */
-  --mesh-font-system:  system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
-  --mesh-font-mono:    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  /* System-only stack: Monaco handles Latin; the OS supplies Chinese glyphs. */
+  --mesh-font-mono:    Monaco, Menlo, Consolas, "Liberation Mono", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", ui-monospace, SFMono-Regular, "SF Mono", monospace;
+  --mesh-font-system:  Monaco, Menlo, Consolas, "Liberation Mono", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", ui-monospace, "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --md-text-font:      var(--mesh-font-system);
   --md-ui-font:        var(--mesh-font-system);
   --md-code-font:      var(--mesh-font-mono);
@@ -324,8 +324,10 @@ html:lang(en) .md-header__option .md-select__link[hreflang="en"]::after {
   color: var(--mesh-ink) !important;
   font-weight: 600 !important;
 }
+/* 首项是 Home，由站点标识承担，故在文档树里隐藏；
+   独立文档集（.kd-nav--standalone）自带首项，不适用此规则 */
 .md-tabs__list > .md-tabs__item:first-child,
-.md-nav--primary > .md-nav__list > .md-nav__item:first-child { display: none !important; }
+.md-nav--primary:not(.kd-nav--standalone) > .md-nav__list > .md-nav__item:first-child { display: none !important; }
 
 /* Sidebar */
 .md-sidebar--primary { width: 12.8rem !important; }
@@ -343,8 +345,8 @@ html:lang(en) .md-header__option .md-select__link[hreflang="en"]::after {
   display: flex; align-items: center; gap: 0.3rem;
 }
 .md-nav__item { margin: 0 !important; padding: 0 !important; }
-/* TOC（右侧目录）保留层级缩进：每嵌套一层左移一档 */
-.md-nav--secondary .md-nav__item .md-nav__item { padding-left: 0.6rem !important; }
+/* TOC（右侧目录）层级缩进统一由下方 secondary 区块的 link padding-left 控制 */
+.md-nav--secondary .md-nav__item .md-nav__item { padding-left: 0 !important; }
 .md-nav--primary .md-nav__list { margin-left: 0 !important; padding-left: 0 !important; }
 .md-nav--primary > .md-nav__list { padding-left: 0 !important; margin-left: 0 !important; }
 .md-nav__link:hover { color: var(--mesh-accent) !important; }
@@ -420,8 +422,6 @@ html:lang(en) .md-header__option .md-select__link[hreflang="en"]::after {
 .md-nav__link[aria-current="page"] {
   font-weight: 600 !important;
   color: var(--mesh-accent) !important;
-  border-left: 2px solid var(--mesh-accent);
-  padding-left: calc(0.6rem - 2px) !important;
 }
 
 /* Nested group label (e.g. 基本概念, 流量管理) — bold dark */
@@ -510,9 +510,6 @@ html:lang(en) .md-header__option .md-select__link[hreflang="en"]::after {
 .md-nav--primary .md-nav .md-nav__link {
   padding-left: 0.6rem !important;
 }
-.md-nav--primary .md-nav .md-nav__link[aria-current="page"] {
-  padding-left: calc(0.6rem - 2px) !important;
-}
 
 /* Right sidebar (TOC) */
 .md-sidebar--secondary .md-nav__title {
@@ -530,8 +527,10 @@ html:lang(en) .md-header__option .md-select__link[hreflang="en"]::after {
   font-family: var(--md-ui-font) !important;
   font-size: 0.74rem !important;
   color: var(--mesh-ink-muted) !important;
-  padding: 0.25rem 0.6rem !important;
-  border-left: 2px solid transparent;
+  /* left gutter hosts the collapse toggle for h2; every level keeps it so text
+     x is consistent, and the per-level step (nested list) adds on top */
+  padding: 0.25rem 0.6rem 0.25rem 1rem !important;
+  position: relative;
 }
 .md-sidebar--secondary .md-nav__link:hover {
   color: var(--mesh-accent) !important;
@@ -541,20 +540,38 @@ html:lang(en) .md-header__option .md-select__link[hreflang="en"]::after {
   color: var(--mesh-ink) !important;
 }
 .md-sidebar--secondary .md-nav__link--active {
-  border-left-color: var(--mesh-accent) !important;
   color: var(--mesh-accent) !important;
-  padding-left: calc(0.6rem - 2px) !important;
 }
-.md-sidebar--secondary .md-nav .md-nav__list {
+/* Hierarchy indent — every heading of the same level lines up at the same x;
+   each deeper level (### , #### , ##### …) steps in one CJK character. The step
+   lives on the NESTED list, so it accumulates automatically for any depth
+   (no per-level rules to maintain). Top-level (h2) list keeps no extra indent;
+   only lists inside a nested .md-nav get the step. */
+.md-sidebar--secondary .md-nav__list {
   border-left: none !important;
   margin-left: 0 !important;
-  padding-left: 0.1rem !important;
+  padding-left: 0 !important;
 }
+.md-nav--secondary .md-nav .md-nav__list {
+  padding-left: 0.85rem !important;
+}
+/* Collapse toggle (added by custom.js) hangs in the h2 gutter, out of the
+   flex flow, so the heading text stays flush with the toggle-less siblings. */
+.md-sidebar--secondary .toc-toggle {
+  position: absolute !important;
+  left: 0.28rem;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0 !important;
+  color: var(--mesh-ink-muted);
+  line-height: 1;
+}
+.md-sidebar--secondary .toc-toggle:hover { color: var(--mesh-accent); }
 
 /* Code in prose — compact and unobtrusive */
 .md-typeset code:not(.md-code__content) {
   background-color: var(--mesh-bg-deep) !important;
-  color: var(--mesh-accent) !important;
+  color: var(--ds-color-code-inline-fg) !important;
   border: 1px solid var(--mesh-rule);
   border-radius: 0;
   padding: 0.06em 0.38em;
@@ -683,17 +700,6 @@ html:lang(en) .md-header__option .md-select__link[hreflang="en"]::after {
 .md-footer-meta .md-copyright a:hover {
   color: var(--mesh-accent-hover) !important;
   border-bottom-color: var(--mesh-accent-hover);
-}
-
-/* Reading progress — 2px accent line under the header (created by custom.js) */
-.kd-progress {
-  position: absolute;
-  left: 0; right: 0; bottom: -1px;
-  height: 2px;
-  background: var(--mesh-accent);
-  transform: scaleX(0);
-  transform-origin: 0 50%;
-  pointer-events: none;
 }
 
 /* Force single-scheme */

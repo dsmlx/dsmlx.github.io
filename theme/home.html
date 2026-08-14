@@ -16,8 +16,11 @@
       --t-blue: #1D5BC4;
       --t-blue-bright: #1749A3;
       --t-green: #178A5B;
-      --t-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
-      --t-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+      /* System-only stack: Monaco handles Latin; the OS supplies Chinese glyphs. */
+      --t-sans: Monaco, Menlo, Consolas, "Liberation Mono", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", ui-monospace, "Noto Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --t-mono: Monaco, Menlo, Consolas, "Liberation Mono", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", ui-monospace, SFMono-Regular, "SF Mono", monospace;
+      /* Terminal and code panels. */
+      --t-code: Monaco, Menlo, Consolas, "Liberation Mono", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", ui-monospace, monospace;
       --t-ease: cubic-bezier(.22, .8, .36, 1);
     }
 
@@ -37,7 +40,9 @@
     .md-header,
     .md-header[data-md-state="shadow"],
     .md-header--shadow {
-      position: initial;
+      /* 随页面滚走（非吸顶），但要浮在上移的 hero 之上，否则导航不可点 */
+      position: relative;
+      z-index: 3;
       background: transparent !important;
       border-bottom: 0 !important;
       box-shadow: none !important;
@@ -92,6 +97,7 @@
       z-index: 2;
       max-width: 860px;
       padding-bottom: 120px;
+      text-align: center;
     }
     /* 宽屏时在内容下方留出居中的粒子字带 */
     @media (min-width: 960px) {
@@ -111,9 +117,18 @@
       font-size: clamp(16px, 1.6vw, 18px);
       line-height: 1.85;
       color: var(--t-ink-2);
-      max-width: 36em;
     }
-    .kd-hero-actions { margin-top: 38px; display: flex; gap: 14px; flex-wrap: wrap; }
+    /* 容器收缩到副标题一行的宽度，按钮再等分它 —— 两端与文字首尾对齐。
+       上限按 38em：英文副标题在 Monaco 下比无衬线宽，36em 会把它挤成两行，
+       两端对齐的前提就没了。`max-content` 保证中文不会因此留白。 */
+    .kd-hero-lead {
+      width: max-content;
+      max-width: min(38em, 100%);
+      margin-inline: auto;
+    }
+    /* 按钮切角吃掉 14px 视觉间距，gap 相应加大 */
+    .kd-hero-actions { margin-top: 38px; display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; }
+    .kd-hero-actions .kd-btn { flex: 1; }
     /* 个性化按钮：切角轮廓 + 字号随视口自适应 */
     .kd-btn {
       position: relative;
@@ -123,6 +138,9 @@
       font-weight: 600;
       letter-spacing: .02em;
       padding: .95em 2em;
+      /* Labels are two words; without this the flex row splits them across two
+         lines and the cut corners no longer line up between the buttons. */
+      white-space: nowrap;
       clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
       transition: background .2s ease, color .2s ease, transform .2s ease, box-shadow .2s ease;
     }
@@ -134,6 +152,8 @@
       box-shadow: inset 0 0 0 1px var(--t-line-strong);
     }
     .kd-home .kd-btn-line:hover { box-shadow: inset 0 0 0 1px var(--t-ink); background: rgba(26, 35, 50, .07); }
+    .kd-home .kd-btn-feature { color: #000000; background: #FFFFFF; box-shadow: inset 0 0 0 1px rgba(26, 35, 50, .18); }
+    .kd-home .kd-btn-feature:hover { color: #000000; background: #FFFFFF; box-shadow: inset 0 0 0 1px #000000; transform: translateY(-1px); }
 
     @media (prefers-reduced-motion: no-preference) {
       .kd-hero h1, .kd-hero-sub, .kd-hero-actions { animation: kd-rise .45s var(--t-ease) both; }
@@ -169,7 +189,6 @@
       letter-spacing: -.01em;
       line-height: 1.3;
       color: var(--t-ink);
-      white-space: nowrap;
     }
     @media (max-width: 620px) {
       .kd-h h2 { font-size: clamp(18px, 6vw, 26px); }
@@ -180,6 +199,21 @@
       #why .kd-h h2 { font-size: clamp(24px, 8vw, 32px); }
     }
     .kd-lead { margin: 0 0 52px; max-width: 44em; color: var(--t-ink-2); font-size: 16px; }
+    /* Headings in the two-column sections share a ~413px column. At the full
+       34px they run past the container's right edge, so they no longer line up
+       with the panel beside them; the English titles overflow further still.
+       Scale the type down rather than letting them wrap, so each stays on one
+       line.
+
+       nowrap belongs only here. Keeping a heading on one line is what lines it
+       up with the panel beside it — a full-width heading has no panel to line
+       up with, and forcing nowrap on one only lets a long English title push
+       the page wider than the viewport. Below the two-column breakpoint there
+       is no second column left either, so it lifts there too. */
+    .kd-dx .kd-h h2 { font-size: clamp(20px, 2.3vw, 27px); white-space: nowrap; }
+    @media (max-width: 980px) {
+      .kd-dx .kd-h h2 { white-space: normal; }
+    }
 
     /* ---------- 优点：细线网格 ---------- */
     .kd-feats {
@@ -191,13 +225,13 @@
     }
     .kd-feat-icon {
       display: block;
-      width: 112px;
-      height: 112px;
+      width: 128px;
+      height: 128px;
       margin: 0 auto 30px;
       color: #0D82BC;
       fill: none;
       stroke: currentColor;
-      stroke-width: 1.65;
+      stroke-width: 1.3;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
@@ -215,8 +249,12 @@
       grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
       align-items: start;
     }
-    .kd-dx-left { padding-right: 48px; }
-    .kd-dx-right { padding-left: 48px; }
+    /* min-width: 0 on both columns, or the grid's minmax(0, …) achieves
+       nothing: a grid item defaults to min-width: auto, so the terminal panel
+       inside refuses to shrink below its longest unbreakable line — and its own
+       overflow-x never engages, the column just grows past the viewport. */
+    .kd-dx-left { padding-right: 48px; min-width: 0; }
+    .kd-dx-right { padding-left: 48px; min-width: 0; }
     #dxgate .kd-dx-left { padding-top: 56px; }
 
     /* 标题锁排：官方 mark + 双色 wordmark（dx 冰蓝 / gate 墨色） */
@@ -224,7 +262,11 @@
     .kd-dx-mark { width: 42px; height: 42px; flex: none; }
     .kd-dx-word b { color: #0D82BC; font-weight: inherit; }
     @media (max-width: 980px) {
-      .kd-dx { grid-template-columns: 1fr; }
+      /* minmax(0, 1fr), not 1fr: a bare 1fr floors the column at its content's
+         min-content width, and the nowrap section heading inside makes that the
+         whole heading — the column then pushed the page wider than the
+         viewport instead of the heading being the one thing that overflows. */
+      .kd-dx { grid-template-columns: minmax(0, 1fr); }
       .kd-dx-left { padding-right: 0; }
       #dxgate .kd-dx-left { padding-top: 0; }
       .kd-dx-right {
@@ -265,19 +307,24 @@
     /* 流量拓扑：配置下发，双入口汇聚，四类工作负载分流 */
     .kd-dx-diagram {
       position: relative;
-      min-height: 360px;
+      min-height: 400px;
       overflow: hidden;
       isolation: isolate;
+    }
+    @media (min-width: 1120px) {
+      #dxgate .kd-dx-diagram { transform: scale(1.15); transform-origin: center; }
     }
     .kd-dx-wires { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; overflow: visible; }
     .kd-dx-wire {
       fill: none;
       stroke: var(--t-line-strong);
-      stroke-width: 1.5;
+      /* non-scaling-stroke keeps this an on-screen pixel width, so it does not
+         thin out when the viewBox is stretched to the column. */
+      stroke-width: 1.9;
       vector-effect: non-scaling-stroke;
     }
-    .kd-dx-wire--active { stroke: rgba(13, 130, 188, .72); }
-    .kd-dx-pulse { fill: #37B8E8; filter: drop-shadow(0 0 5px rgba(55, 184, 232, .7)); }
+    .kd-dx-wire--active { stroke: rgba(13, 130, 188, .8); }
+    .kd-dx-pulse { fill: #37B8E8; filter: drop-shadow(0 0 6px rgba(55, 184, 232, .75)); }
 
     .kd-dx-node {
       position: absolute;
@@ -290,44 +337,46 @@
       background: transparent;
       color: var(--t-ink);
       font-family: var(--t-mono);
-      font-size: 10.5px;
+      font-size: 12.5px;
       line-height: 1.35;
     }
     .kd-dx-icon {
-      width: 18px; height: 18px; margin-right: 8px; flex: none;
+      width: 21px; height: 21px; margin-right: 9px; flex: none;
       color: #0D82BC;
     }
-    .kd-dx-brand-icons { display: inline-flex; align-items: center; gap: 5px; margin-right: 8px; flex: none; }
-    .kd-dx-brand-icons img { width: 16px; height: 16px; }
-    .kd-dx-input { left: 0; width: 22%; }
+    .kd-dx-brand-icons { display: inline-flex; align-items: center; gap: 4px; margin-right: 6px; flex: none; }
+    .kd-dx-brand-icons img { width: 19px; height: 19px; }
+    .kd-dx-input { left: 0; width: 24%; }
     .kd-dx-input--gateway { top: 23%; }
     .kd-dx-input--agent { top: 64%; }
     .kd-dx-input--agent span { white-space: nowrap; }
     .kd-dx-core {
-      top: 37%; left: 43%; width: 14%; min-height: 0; aspect-ratio: 1;
+      top: 37%; left: 41.5%; width: 17%; min-height: 0; aspect-ratio: 1;
       flex-direction: column;
       justify-content: center;
       padding: 12px;
       border: 1px solid rgba(13, 130, 188, .5);
       border-radius: 50%;
       background: radial-gradient(circle, color-mix(in srgb, #0D82BC 12%, var(--t-bg)) 0 48%, transparent 72%);
-      box-shadow: 0 0 0 10px rgba(13, 130, 188, .035);
+      box-shadow: 0 0 0 12px rgba(13, 130, 188, .04);
     }
-    .kd-dx-core-mark { width: 34px; height: 34px; }
-    .kd-dx-output { left: 69%; width: 28%; }
+    .kd-dx-core-mark { width: 46px; height: 46px; }
+    .kd-dx-output { left: 67%; width: 33%; }
     .kd-dx-output--dubbo { top: 15%; }
     .kd-dx-output--llm { top: 40%; }
     .kd-dx-output--mcp { top: 71%; }
 
     @media (prefers-reduced-motion: reduce) { .kd-dx-pulse { display: none; } }
     @media (max-width: 620px) {
-      .kd-dx-diagram { min-height: 330px; }
-      .kd-dx-node { min-height: 50px; padding: 8px; font-size: 9.5px; }
-      .kd-dx-icon { width: 15px; height: 15px; margin-right: 6px; }
+      .kd-dx-diagram { min-height: 340px; }
+      .kd-dx-node { min-height: 50px; padding: 8px; font-size: 11.5px; }
+      .kd-dx-icon { width: 17px; height: 17px; margin-right: 6px; }
       .kd-dx-brand-icons { gap: 3px; margin-right: 5px; }
-      .kd-dx-brand-icons img { width: 13px; height: 13px; }
-      .kd-dx-core { left: 41%; width: 18%; min-height: 0; }
-      .kd-dx-core-mark { width: 25px; height: 25px; }
+      .kd-dx-brand-icons img { width: 15px; height: 15px; }
+      /* The core keeps the same 40%/60% edges as on desktop so the wire
+         endpoints, which are fixed viewBox coordinates, still meet it. */
+      .kd-dx-core { left: 41.5%; width: 17%; min-height: 0; }
+      .kd-dx-core-mark { width: 30px; height: 30px; }
     }
 
     /* 镜像变体：视觉面板在左，文案在右 */
@@ -375,7 +424,7 @@
       background: #151828;
       box-shadow: 0 18px 42px rgba(15, 22, 39, .12);
       color: #D8DEEC;
-      font-family: var(--t-mono);
+      font-family: var(--t-code);
       font-size: 12.5px;
       line-height: 1.75;
       white-space: pre;
@@ -385,6 +434,102 @@
     .kd-rt-yaml .key { color: #79C7FF; }
     .kd-rt-yaml .value { color: #F0D48A; }
     .kd-rt-yaml .comment { color: #7F899F; }
+
+    /* ---------- Serverless：终端回放，请求到达扩容 / 空闲缩容 ---------- */
+    .kd-sl-term {
+      /* Pulled up so the panel starts level with the heading rather than with
+         the lead paragraph below it. */
+      margin-top: -6px;
+      border: 1px solid var(--t-line);
+      border-radius: 10px;
+      background: #0F1420;
+      overflow: hidden;
+    }
+    .kd-sl-bar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, .07);
+      background: rgba(255, 255, 255, .03);
+    }
+    .kd-sl-dot { width: 10px; height: 10px; border-radius: 50%; background: #39404F; }
+    .kd-sl-body {
+      /* Rows are block elements rather than lines inside a <pre>: nothing is
+         ever hidden, so the panel is exactly as tall as its eight rows and can
+         never show reserved-but-empty space. */
+      padding: 14px 0;
+      color: #C6CEDD;
+      font-family: var(--t-code);
+      font-size: 12.5px;
+      line-height: 1.9;
+    }
+    .kd-sl-line {
+      padding: 0 18px;
+      /* Keeps the column spacing of the fake kubectl output without relying on
+         newlines in the markup. */
+      white-space: pre;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    /* Separates the two commands without an empty row, which would collapse
+       under white-space: pre. */
+    .kd-sl-line--gap { margin-top: 1.15em; }
+    .kd-sl-body .prompt { color: #6FD08C; }
+    .kd-sl-body .cmd { color: #E8EDF5; }
+    .kd-sl-body .ok { color: #C6CEDD; }
+    .kd-sl-body .head { color: #7F899F; }
+    .kd-sl-body .zero { color: #8892A4; }
+    .kd-sl-body .up { color: #6FD08C; }
+    .kd-sl-body .down { color: #F0D48A; }
+    .kd-sl-body .note { color: #6B7488; }
+
+    /* Rows print one after another and then stay, the way a real -w stream
+       does. Each needs its own keyframes rather than a shared animation with
+       staggered delays: a delay shifts the whole cycle, so rows would also
+       clear at staggered times and leave holes above the ones still showing.
+       Here every row clears together at 97%, so blank space only ever sits
+       below the last printed row. */
+    .kd-sl-line--row { opacity: 0; animation-duration: 14s; animation-timing-function: steps(1, end); animation-iteration-count: infinite; }
+    .kd-sl-line--row:nth-of-type(5)  { animation-name: kd-sl-print-1; }
+    .kd-sl-line--row:nth-of-type(6)  { animation-name: kd-sl-print-2; }
+    .kd-sl-line--row:nth-of-type(7)  { animation-name: kd-sl-print-3; }
+    .kd-sl-line--row:nth-of-type(8)  { animation-name: kd-sl-print-4; }
+    .kd-sl-line--row:nth-of-type(9)  { animation-name: kd-sl-print-5; }
+    .kd-sl-line--row:nth-of-type(10) { animation-name: kd-sl-print-6; }
+    .kd-sl-line--row:nth-of-type(11) { animation-name: kd-sl-print-7; }
+    .kd-sl-line--row:nth-of-type(12) { animation-name: kd-sl-print-8; }
+
+    @keyframes kd-sl-print-1 { 0% { opacity: 0 }  9% { opacity: 1 } 97% { opacity: 0 } }
+    @keyframes kd-sl-print-2 { 0% { opacity: 0 } 18% { opacity: 1 } 97% { opacity: 0 } }
+    @keyframes kd-sl-print-3 { 0% { opacity: 0 } 27% { opacity: 1 } 97% { opacity: 0 } }
+    @keyframes kd-sl-print-4 { 0% { opacity: 0 } 36% { opacity: 1 } 97% { opacity: 0 } }
+    @keyframes kd-sl-print-5 { 0% { opacity: 0 } 45% { opacity: 1 } 97% { opacity: 0 } }
+    @keyframes kd-sl-print-6 { 0% { opacity: 0 } 54% { opacity: 1 } 97% { opacity: 0 } }
+    @keyframes kd-sl-print-7 { 0% { opacity: 0 } 63% { opacity: 1 } 97% { opacity: 0 } }
+    @keyframes kd-sl-print-8 { 0% { opacity: 0 } 72% { opacity: 1 } 97% { opacity: 0 } }
+
+    .kd-sl-caret {
+      display: inline-block;
+      width: 7px;
+      height: 13px;
+      margin-left: 4px;
+      background: #6FD08C;
+      vertical-align: -2px;
+      animation: kd-sl-caret 1.05s steps(2, end) infinite;
+    }
+    @keyframes kd-sl-caret { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      /* Opacity has to be restored explicitly: dropping the animation alone
+         would leave every printed row stuck at its initial 0. */
+      .kd-sl-line--row { opacity: 1; animation: none; }
+      .kd-sl-caret { animation: none; }
+    }
+    @media (max-width: 620px) {
+      .kd-sl-body { padding: 11px 0; font-size: 10.5px; line-height: 1.85; }
+      .kd-sl-line { padding: 0 12px; }
+    }
 
     /* ---------- 迈向云原生：走马灯 ---------- */
     .kd-eco {
@@ -480,10 +625,13 @@
       <canvas class="kd-net" id="kd-net" aria-hidden="true"></canvas>
       <div class="kd-wrap kd-hero-inner">
         <h1>{% if en %}The runtime is the mesh.{% else %}运行时即网格。{% endif %}</h1>
-        <p class="kd-hero-sub">{{ 'No proxies — and still all the value of a service mesh.' if en else '没有代理，仍然可以获得服务网格的所有价值。' }}</p>
-        <div class="kd-hero-actions">
-          <a class="kd-btn kd-btn-solid" href="{{ (lp ~ 'setup/install/dubboctl/') | url }}">{{ 'Get started' if en else '快速开始' }}</a>
-          <a class="kd-btn kd-btn-line" href="https://github.com/apache/dubbo-kubernetes">GitHub</a>
+        {#- 副标题与按钮共用一个收缩到文字宽度的容器，两端因此对齐 -#}
+        <div class="kd-hero-lead">
+          <p class="kd-hero-sub">{{ 'No proxies — and still all the value of a service mesh.' if en else '没有代理，仍然可以获得服务网格的所有价值。' }}</p>
+          <div class="kd-hero-actions">
+            <a class="kd-btn kd-btn-solid" href="{{ (lp ~ 'setup/install/dubboctl/') | url }}">{{ 'Get started' if en else '快速开始' }}</a>
+            <a class="kd-btn kd-btn-feature" href="{{ (lp ~ 'latest/release/') | url }}">{{ 'Release Notes' if en else '版本更新' }}</a>
+          </div>
         </div>
       </div>
     </section>
@@ -497,7 +645,7 @@
               <rect x="3.5" y="4.5" width="25" height="23" rx="2.5"/>
               <path d="M3.5 10.5h25M8 8h.01M11 8h.01M8 23v-5M13.5 23v-8M19 23v-4M24.5 23v-10"/>
             </svg>
-            <h3>Dubbod GUI</h3>
+            <h3>GUI</h3>
             <p>{{ 'Provides control-plane overview, metrics, and log views.' if en else '提供控制面概览、指标与日志视图。' }}</p>
           </div>
           <div class="kd-feat">
@@ -528,9 +676,8 @@
       <div class="kd-wrap kd-reveal kd-dx">
         <div class="kd-dx-left">
           <div class="kd-h kd-dx-title">
-            <h2>{{ 'New Gateway Data Plane' if en else '新型网关数据面' }}</h2>
+            <h2>{{ 'A New Gateway Data Plane' if en else '全新网关数据面' }}</h2>
           </div>
-          <p class="kd-dx-lead">{{ 'The Dubbo delegated gateway (Gateway API specification) serves LLM, MCP, and A2A agent workloads.' if en else 'Dubbo 委托网关（Gateway API 规范）为 LLM、MCP、A2A 智能体工作负载提供服务。' }}</p>
           <ul class="kd-dx-points">
             <li>{{ 'Traditional applications and AI Agents connect through the same gateway data plane' if en else '传统应用与 AI Agent 接入同一个网关数据面' }}</li>
             <li>{{ 'Traditional application routes are delivered dynamically through xDS, while AI routes are declared through static configuration; the two routing configurations remain independent' if en else '传统应用路由由 xDS 动态下发，AI 路由由静态配置声明，两套路由配置互不影响' }}</li>
@@ -557,16 +704,16 @@
                   <circle cx="8" cy="8" r="4"/><circle cx="16" cy="8" r="4"/><circle cx="12" cy="16" r="4"/>
                 </symbol>
               </defs>
-              <path class="kd-dx-wire kd-dx-wire--active" d="M158 137H210Q258 137 310 190" marker-end="url(#kd-dx-arrow)"/>
-              <path class="kd-dx-wire kd-dx-wire--active" d="M158 317H210Q258 317 310 232" marker-end="url(#kd-dx-arrow)"/>
-              <path class="kd-dx-wire kd-dx-wire--active" d="M410 190V121Q410 101 430 101H497" marker-end="url(#kd-dx-arrow)"/>
-              <path class="kd-dx-wire kd-dx-wire--active" d="M410 211H497" marker-end="url(#kd-dx-arrow)"/>
-              <path class="kd-dx-wire kd-dx-wire--active" d="M410 230V328Q410 348 430 348H497" marker-end="url(#kd-dx-arrow)"/>
-              <circle class="kd-dx-pulse" r="3"><animateMotion dur="2.8s" repeatCount="indefinite" path="M158 137H210Q258 137 310 190"/></circle>
-              <circle class="kd-dx-pulse" r="3"><animateMotion dur="3.2s" begin="-.9s" repeatCount="indefinite" path="M158 317H210Q258 317 310 232"/></circle>
-              <circle class="kd-dx-pulse" r="3"><animateMotion dur="2.4s" begin="-.5s" repeatCount="indefinite" path="M410 190V121Q410 101 430 101H497"/></circle>
-              <circle class="kd-dx-pulse" r="3"><animateMotion dur="2.7s" begin="-1.4s" repeatCount="indefinite" path="M410 211H497"/></circle>
-              <circle class="kd-dx-pulse" r="3"><animateMotion dur="3s" begin="-2s" repeatCount="indefinite" path="M410 230V328Q410 348 430 348H497"/></circle>
+              <path class="kd-dx-wire kd-dx-wire--active" d="M173 137H215Q262 137 300 186" marker-end="url(#kd-dx-arrow)"/>
+              <path class="kd-dx-wire kd-dx-wire--active" d="M173 317H215Q262 317 300 254" marker-end="url(#kd-dx-arrow)"/>
+              <path class="kd-dx-wire kd-dx-wire--active" d="M426 190V121Q426 101 446 101H482" marker-end="url(#kd-dx-arrow)"/>
+              <path class="kd-dx-wire kd-dx-wire--active" d="M426 211H482" marker-end="url(#kd-dx-arrow)"/>
+              <path class="kd-dx-wire kd-dx-wire--active" d="M426 230V328Q426 348 446 348H482" marker-end="url(#kd-dx-arrow)"/>
+              <circle class="kd-dx-pulse" r="3.8"><animateMotion dur="2.8s" repeatCount="indefinite" path="M173 137H215Q262 137 300 186"/></circle>
+              <circle class="kd-dx-pulse" r="3.8"><animateMotion dur="3.2s" begin="-.9s" repeatCount="indefinite" path="M173 317H215Q262 317 300 254"/></circle>
+              <circle class="kd-dx-pulse" r="3.8"><animateMotion dur="2.4s" begin="-.5s" repeatCount="indefinite" path="M426 190V121Q426 101 446 101H482"/></circle>
+              <circle class="kd-dx-pulse" r="3.8"><animateMotion dur="2.7s" begin="-1.4s" repeatCount="indefinite" path="M426 211H482"/></circle>
+              <circle class="kd-dx-pulse" r="3.8"><animateMotion dur="3s" begin="-2s" repeatCount="indefinite" path="M426 230V328Q426 348 446 348H482"/></circle>
             </svg>
 
             <div class="kd-dx-node kd-dx-input kd-dx-input--gateway">
@@ -649,6 +796,32 @@
       </div>
     </section>
 
+    <section class="kd-section" id="serverless">
+      <div class="kd-wrap kd-reveal kd-dx">
+        <div class="kd-dx-left">
+          <div class="kd-h"><h2>{{ 'Scales to Zero When Idle' if en else '缩容到零，请求到达即唤醒' }}</h2></div>
+          <p class="kd-dx-lead">{{ 'An idle service costs nothing; the first request brings it back.' if en else '空闲的服务不占用资源，第一个请求会把它唤醒。' }}</p>
+          <ul class="kd-dx-points">
+            <li>{{ 'A request for a service with no endpoints is held rather than failed, and replayed once the workload is ready' if en else '访问无端点服务的请求会被暂存而不是失败，工作负载就绪后再转发' }}</li>
+            <li>{{ 'Replica counts stay with the autoscaler, so a workload is never driven by two controllers at once' if en else '副本数仍由自动伸缩器掌管，工作负载不会被两个控制器同时驱动' }}</li>
+            <li>{{ 'Once endpoints are back, calls go straight to the workload again and the activation path steps aside' if en else '端点恢复后调用重新直连工作负载，激活路径随即退出' }}</li>
+          </ul>
+        </div>
+
+        <div class="kd-dx-right">
+          <div class="kd-sl-term" role="img"
+               aria-label="{{ 'Terminal replay: an idle service sits at zero replicas, a request scales it up, and it returns to zero once traffic stops.' if en else '终端回放：空闲服务保持零副本，请求到达后扩容，流量停止后回到零。' }}">
+            <div class="kd-sl-bar" aria-hidden="true">
+              <span class="kd-sl-dot"></span>
+              <span class="kd-sl-dot"></span>
+              <span class="kd-sl-dot"></span>
+            </div>
+            <div class="kd-sl-body" aria-hidden="true"><div class="kd-sl-line"><span class="prompt">$</span> <span class="cmd">kubectl apply -f payment-activation.yaml</span></div><div class="kd-sl-line"><span class="ok">serviceactivationpolicy.networking.dubbo.apache.org/payment created</span></div><div class="kd-sl-line kd-sl-line--gap"><span class="prompt">$</span> <span class="cmd">kubectl get deploy payment -w</span></div><div class="kd-sl-line"><span class="head">NAME      READY   UP-TO-DATE   AVAILABLE   AGE</span></div><div class="kd-sl-line kd-sl-line--row"><span class="zero">payment   0/0     0            0           12m</span>   <span class="note">{{ 'idle, scaled to zero' if en else '空闲，已缩容到零' }}</span></div><div class="kd-sl-line kd-sl-line--row"><span class="up">payment   0/1     1            0           14m</span>   <span class="note">{{ 'request held, waking' if en else '请求暂存，正在唤醒' }}</span></div><div class="kd-sl-line kd-sl-line--row"><span class="up">payment   1/1     1            1           14m</span>   <span class="note">{{ 'request forwarded' if en else '暂存请求已转发' }}</span></div><div class="kd-sl-line kd-sl-line--row"><span class="up">payment   2/2     2            2           15m</span>   <span class="note">{{ 'scaling with load' if en else '随负载扩容' }}</span></div><div class="kd-sl-line kd-sl-line--row"><span class="up">payment   3/3     3            3           16m</span></div><div class="kd-sl-line kd-sl-line--row"><span class="down">payment   2/2     2            2           20m</span>   <span class="note">{{ 'traffic falling off' if en else '流量回落' }}</span></div><div class="kd-sl-line kd-sl-line--row"><span class="down">payment   1/1     1            1           21m</span></div><div class="kd-sl-line kd-sl-line--row"><span class="zero">payment   0/0     0            0           23m</span>   <span class="note">{{ 'idle again' if en else '重新回到空闲' }}</span><span class="kd-sl-caret"></span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="kd-section" id="ecosystem">
       <div class="kd-wrap kd-reveal">
         <div class="kd-h"><h2>{{ 'Aligned with the Mainstream Cloud Native Ecosystem' if en else '对齐云原生主流生态' }}</h2></div>
@@ -723,8 +896,20 @@
         var freeze = false;        /* ?kdword：冻结在成字态 */
         var FLOAT_MS = 6500, HOLD_MS = 4500, FIRST_FLOAT_MS = 700;
 
-        /* 离屏渲染 "Dubbo Mesh" 并采样为目标点（窄屏不排字） */
+        /* 手工点阵字模："Dubbo Mesh" 逐字定义，与窗口尺寸/相位无关，渲染永远一致（窄屏不排字） */
         var WORD = 'Dubbo Mesh';
+        var GLYPHS = {
+          'D': ['', '#####.', '##..##', '##..##', '##..##', '##..##', '##..##', '##..##', '######', '#####.'],
+          'u': ['', '', '', '##..##', '##..##', '##..##', '##..##', '##..##', '######', '.#####'],
+          'b': ['##....', '##....', '##....', '#####.', '##..##', '##..##', '##..##', '##..##', '######', '#####.'],
+          'o': ['', '', '', '.####.', '##..##', '##..##', '##..##', '##..##', '######', '.####.'],
+          'M': ['', '##...##', '###.###', '##.#.##', '##.#.##', '##.#.##', '##...##', '##...##', '##...##', '##...##'],
+          'e': ['', '', '', '..####.', '.##..##', '##...##', '#######', '##.....', '.######', '..#####'],
+          's': ['', '', '', '.#####', '##....', '##....', '.####.', '....##', '....##', '#####.'],
+          'h': ['##....', '##....', '##....', '#####.', '##..##', '##..##', '##..##', '##..##', '##..##', '##..##'],
+          ' ': []
+        };
+        var GLYPH_ADV = 7.5;      /* 等宽字距（网格列） */
         var sampleWord = function () {
           targets = [];
           if (W < 960 || H < 480) return;
@@ -732,46 +917,30 @@
           /* 内容真实底边（扣除为字带预留的 padding，再留 80px 呼吸） */
           var innerBottom = inner ? (inner.offsetTop + inner.offsetHeight - 340) : H * 0.55;
           var zoneW = Math.min(W * 0.7, 1100);
-          var off = document.createElement('canvas');
-          var octx = off.getContext('2d');
-          var font = function (px) {
-            return '700 ' + px + 'px ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace';
-          };
-          octx.font = font(100);
-          var fs = Math.min(100 * zoneW / octx.measureText(WORD).width, 230);
-          off.width = Math.ceil(zoneW);
-          off.height = Math.ceil(fs * 1.3);
+          var totalCols = (WORD.length - 1) * GLYPH_ADV + 6;
+          var unit = zoneW / totalCols;
+          var gridW = totalCols * unit;
+          var gridH = 9 * unit;
           /* 字带 = 内容底边 → 底部渐隐之上；放不下就放弃排字 */
           var band = H - 60 - innerBottom;
-          if (band < off.height + 20) return;
-          octx = off.getContext('2d');
-          octx.font = font(fs);
-          octx.textBaseline = 'middle';
-          octx.fillStyle = '#fff';
-          octx.fillText(WORD, (off.width - octx.measureText(WORD).width) / 2, off.height / 2);
-          var data = octx.getImageData(0, 0, off.width, off.height).data;
-          /* 自适应采样步长：把点数收敛到 ~320 以内 */
-          var step = Math.max(3, Math.round(fs / 30));
-          var pts, x, y;
-          do {
-            pts = [];
-            for (y = 0; y < off.height; y += step) {
-              for (x = 0; x < off.width; x += step) {
-                if (data[(y * off.width + x) * 4 + 3] > 128) pts.push([x, y]);
+          if (band < gridH + 120) return;
+          /* 字形水平居中，垂直居中于字带 */
+          var x0 = (W - gridW) / 2;
+          var y0 = innerBottom + band / 2 - gridH / 2;
+          for (var i = 0; i < WORD.length; i++) {
+            var rows = GLYPHS[WORD.charAt(i)] || [];
+            for (var r = 0; r < rows.length; r++) {
+              for (var c = 0; c < rows[r].length; c++) {
+                if (rows[r].charAt(c) === '#') {
+                  targets.push({ x: x0 + (i * GLYPH_ADV + c) * unit, y: y0 + r * unit });
+                }
               }
             }
-            step += 1;
-          } while (pts.length > 320);
-          /* 字形水平居中，垂直居中于字带 */
-          var x0 = (W - off.width) / 2;
-          var y0 = innerBottom + band / 2 - off.height / 2;
-          for (var k = 0; k < pts.length; k++) {
-            targets.push({ x: x0 + pts[k][0], y: y0 + pts[k][1] });
           }
           /* 打散配对顺序，汇聚时轨迹交错更自然 */
           for (var m = targets.length - 1; m > 0; m--) {
-            var r = Math.floor(Math.random() * (m + 1));
-            var tmp = targets[m]; targets[m] = targets[r]; targets[r] = tmp;
+            var rr = Math.floor(Math.random() * (m + 1));
+            var tmp = targets[m]; targets[m] = targets[rr]; targets[rr] = tmp;
           }
         };
 
