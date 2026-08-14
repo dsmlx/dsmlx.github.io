@@ -41,7 +41,7 @@ Inherent 架构下，策略在应用进程内执行，因此每项能力同时�
 | 能力 | 配置 API | 说明         | 状态 |
 |---|---|------------|---|
 | 控制面指标 | — | :8080/metrics | 支持 |
-| 网格指标 / 链路追踪 / 日志 | Telemetry + `samples/addons` | 任务 → 可观测性  | 支持 |
+| 网格指标 | [Telemetry](telemetry.md) + `samples/addons` | 标准 RPC 指标由 Inherent Client / Server 生成 | 支持 |
 | 内嵌 GUI | — | overview / logs / metrics 视图 | 支持 |
 
 ## 可伸缩性

@@ -3,13 +3,15 @@
 Telemetry API 控制 Inherent Client 和 Server 的指标生成规则。
 规则由 Inherent 运行时在应用进程内执行，不创建代理工作负载。
 
+配置 `prometheus` provider 后，请求数、请求耗时、请求大小、响应大小四个标准指标默认开启。名称、类型和标准标签见 [Telemetry 参考](../../../reference/telemetry.md)。
+
 ## 前提
 
 已安装 dubbod，并且工作负载已启用 Inherent 模式。
 
 ## 开启指标
 
-下面配置在网格范围启用 Prometheus，并从 Client 和 Server 的请求计数中移除 `grpc_response_status` 标签：
+下面配置在网格范围启用 Prometheus，并从 Client 和 Server 的请求计数中移除 `grpc_response_status` 标签。规则只修改 `REQUEST_COUNT`；其余标准指标继续使用默认配置：
 
 ```bash
 cat <<EOF | kubectl apply -f -
