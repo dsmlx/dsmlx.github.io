@@ -146,7 +146,7 @@ nav:
   - 示例: example/moviereview.md
   - 参考:
       - 能力矩阵: reference/capability-matrix.md
-      - Telemetry: reference/telemetry.md
+      - 应用标准指标: reference/application-standard-metrics.md
   - 运维: operation/index.md
   - 公告栏: latest/release/index.md
 

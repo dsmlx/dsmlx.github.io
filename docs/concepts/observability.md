@@ -4,7 +4,7 @@ Dubbo 当前的可观测性以指标为主。控制面暴露运行状态和 xDS 
 
 ## 指标
 
-dubbod 通过 `/metrics` 暴露控制面指标。Inherent 标准指标和标签见 [Telemetry 参考](../reference/telemetry.md)。托管 Gateway 创建的 dxgate Pod 带有 Prometheus 抓取注解，Prometheus 可以通过 Kubernetes Pod discovery 自动采集 `/metrics`。dxgate HTTP 指标使用稳定标签 `namespace`、`gateway`、`route`、`cluster`、`method`、`status_code`。
+dubbod 通过 `/metrics` 暴露控制面指标。Inherent 标准指标和标签见[应用标准指标](../reference/application-standard-metrics.md)。托管 Gateway 创建的 dxgate Pod 带有 Prometheus 抓取注解，Prometheus 可以通过 Kubernetes Pod discovery 自动采集 `/metrics`。dxgate HTTP 指标使用稳定标签 `namespace`、`gateway`、`route`、`cluster`、`method`、`status_code`。
 
 ## 同步状态
 

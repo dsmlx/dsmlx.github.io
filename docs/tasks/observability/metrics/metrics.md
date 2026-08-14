@@ -3,7 +3,7 @@
 Telemetry API 控制 Inherent Client 和 Server 的指标生成规则。
 规则由 Inherent 运行时在应用进程内执行，不创建代理工作负载。
 
-配置 `prometheus` provider 后，请求数、请求耗时、请求大小、响应大小四个标准指标默认开启。名称、类型和标准标签见 [Telemetry 参考](../../../reference/telemetry.md)。
+配置 `prometheus` provider 后，请求数、请求耗时、请求大小、响应大小四个标准指标默认开启。名称、类型和标准标签见[应用标准指标](../../../reference/application-standard-metrics.md)。
 
 ## 前提
 
