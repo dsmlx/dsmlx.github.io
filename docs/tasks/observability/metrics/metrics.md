@@ -7,7 +7,7 @@ Telemetry API 控制 Inherent Client 和 Server 的指标生成规则。
 
 ## 前提
 
-已安装 dubbod，并且工作负载已启用 Inherent 模式。
+已安装 dubbod，应用使用 Inherent gRPC Application SDK，并且工作负载已启用 Inherent 模式。指标端点和抓取声明由系统自动配置。
 
 ## 开启指标
 

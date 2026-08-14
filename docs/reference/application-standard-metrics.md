@@ -1,6 +1,6 @@
 # 应用标准指标
 
-应用标准指标由 Inherent gRPC 运行时在应用进程内生成，不依赖代理工作负载。Telemetry API 负责开启指标并定制作用域和标签，不负责定义指标本身。
+应用标准指标由 Inherent gRPC 运行时在应用进程内生成，不依赖代理工作负载。Application SDK 创建 gRPC Client 和 Server 时自动接入采集；控制面自动注入指标端点和 Prometheus 抓取声明，业务代码不需要手动注册 `/metrics`。Telemetry API 负责开启指标并定制作用域和标签，不负责定义指标本身。
 
 ## 指标类型
 
