@@ -1,4 +1,4 @@
-本任务使用 `samples/app` 的 nginx 服务验证 Dubbo mTLS。mTLS 是 Mutual TLS，表示客户端和服务端使用证书互相校验身份；`grpc-inbound` 是注入到服务端 Pod 的入站代理，监听 `15080` 并转发到本地业务端口。
+本任务使用 `samples/app` 的 nginx 服务验证 Dubbo mTLS。mTLS 是 Mutual TLS，表示客户端和服务端使用证书互相校验身份；`grpc-inbound` 是注入到服务端 Pod 的入站代理，监听 `25080` 并转发到本地业务端口。
 
 ## 前提条件
 
