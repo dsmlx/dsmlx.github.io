@@ -138,6 +138,7 @@ nav:
           - JWT 认证与授权: tasks/security/jwt.md
       - 可观测性:
           - 指标: tasks/observability/metrics/metrics.md
+          - 访问日志: tasks/observability/logs/logs.md
       - 可扩展性:
           - 网格服务: tasks/extensibility/service-entry.md
           - 非网格服务: tasks/extensibility/virtual-machines.md

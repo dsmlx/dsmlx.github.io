@@ -69,12 +69,16 @@ scrape_configs:
 
 ## Access logs
 
-Access logging is on by default and writes to standard output. Two environment variables control it:
+Access logging is enabled by default and writes to standard output. Managed gateways normally use the [Telemetry API](../tasks/observability/logs/logs.md); the control plane translates it into these environment variables:
 
 | Variable | Values | Default |
 | --- | --- | --- |
 | `DXGATE_ACCESS_LOG` | `false` / `0` / `no` / `off` disable; anything else enables | enabled |
 | `DXGATE_ACCESS_LOG_FORMAT` | `json` or `text` | `text` |
+| `DXGATE_ACCESS_LOG_MODE` | `SERVER`, `CLIENT`, or `CLIENT_AND_SERVER` | `CLIENT_AND_SERVER` |
+| `DXGATE_ACCESS_LOG_FILTER` | Access-log filter expression | None |
+| `DXGATE_ACCESS_LOG_TAGS` | Static-tag JSON object | None |
+| `DXGATE_OTEL_LOGS_ENDPOINT` | OTLP/gRPC logs endpoint | Falls back to `DXGATE_OTEL_ENDPOINT` |
 
 The JSON format is one object per line with a fixed set of fields:
 
@@ -95,7 +99,7 @@ The JSON format is one object per line with a fixed set of fields:
 }
 ```
 
-`trace_id` and `span_id` come from the same context as the traces below, so a log line leads straight to its trace.
+`trace_id` and `span_id` come from the same context as the traces below, so a log line leads straight to its trace. With the `otel` provider, the same request is also exported as an OTLP LogRecord containing these request fields and the static Telemetry tags.
 
 ## Tracing
 

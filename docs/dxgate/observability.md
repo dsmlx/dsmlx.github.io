@@ -69,12 +69,16 @@ scrape_configs:
 
 ## 访问日志
 
-访问日志默认开启，写到标准输出。两个环境变量控制它：
+访问日志默认开启并写到标准输出。受管网关通常通过 [Telemetry API](../tasks/observability/logs/logs.md) 配置；控制面会把配置转换成下列环境变量：
 
 | 环境变量 | 取值 | 默认 |
 | --- | --- | --- |
 | `DXGATE_ACCESS_LOG` | `false` / `0` / `no` / `off` 关闭，其余开启 | 开启 |
 | `DXGATE_ACCESS_LOG_FORMAT` | `json` 或 `text` | `text` |
+| `DXGATE_ACCESS_LOG_MODE` | `SERVER`、`CLIENT` 或 `CLIENT_AND_SERVER` | `CLIENT_AND_SERVER` |
+| `DXGATE_ACCESS_LOG_FILTER` | 访问日志过滤表达式 | 无 |
+| `DXGATE_ACCESS_LOG_TAGS` | 静态标签 JSON 对象 | 无 |
+| `DXGATE_OTEL_LOGS_ENDPOINT` | OTLP/gRPC 日志端点 | 回退到 `DXGATE_OTEL_ENDPOINT` |
 
 JSON 格式每条一行，字段固定：
 
@@ -95,7 +99,7 @@ JSON 格式每条一行，字段固定：
 }
 ```
 
-`trace_id` 与 `span_id` 与下面的链路追踪同源，便于从一条日志跳到对应的 trace。
+`trace_id` 与 `span_id` 与下面的链路追踪同源，便于从一条日志跳到对应的 trace。配置 `otel` provider 后，同一请求还会作为 OTLP LogRecord 导出，包含这些请求字段和 Telemetry 静态标签。
 
 ## 链路追踪
 
