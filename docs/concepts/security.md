@@ -4,12 +4,12 @@ Dubbo 安全基础架构负责工作负载身份、传输加密、请求认证�
 
 安全能力按数据面实际职责拆分，不要求所有流量经过同一套过滤器：
 
-- `dubbod` 内置 CA 为接入网格的工作负载签发短期证书，持续轮换证书和根证书，并通过 bootstrap/SDS 配置交付给数据面。私钥只写入工作负载 Secret，不进入 xDS 运行时配置。
-- `dxproxy` 保护东西向 Inherent gRPC 入站流量：执行 `PeerAuthentication`，从已验证客户端证书的 URI SAN 提取 SPIFFE 身份，再执行基于 `principals` 的 `AuthorizationPolicy`。
+- `dubbod` 内置 CA 为接入网格的工作负载签发短期证书并持续轮换。Inherent 应用通过挂载 Secret 和 `file_watcher` 加载证书；dxgate 通过 ADS SDS 订阅 `default` 与 `ROOTCA`，校验后 ACK，错误版本 NACK 并继续使用最后有效证书。
+- Inherent gRPC 应用由原生 xDS client/server 执行 `PeerAuthentication` 与 SPIFFE 身份校验，不注入 dxproxy 或 `grpc-inbound` sidecar。
 - `dxgate` 保护 Gateway API HTTP 流量：验证 JWT 签名、`issuer`、`audience` 和有效期，生成 `requestPrincipal`，再执行基于 `requestPrincipals` 与 `request.auth.claims[...]` 的 `AuthorizationPolicy`。
 - `dubbod` 按 namespace 和 workload selector 选择策略。无法由当前数据面可靠验证的字段不会被降级为更宽松的规则。
 
-认证失败或授权不匹配都在数据面直接拒绝。dxproxy 暴露 `dxproxy_authorization_denials_total`，dxgate 把拒绝计入 `policy_denied` 指标并记录请求失败日志。
+认证失败或授权不匹配都在数据面直接拒绝。dxgate 把拒绝计入 `policy_denied` 指标并记录请求失败日志。
 
 ## 对等认证
 
@@ -28,7 +28,7 @@ spec:
 
 ### mTLS 模式
 
-- `PERMISSIVE`：同时接受明文和 mTLS 流量。服务端注入的 `grpc-inbound` 会接收 mTLS 流量并转发到本地业务端口，同时不打断已有明文流量。
+- `PERMISSIVE`：原生 gRPC xDS server 同时接受明文和 mTLS 流量。
 - `STRICT`：只接受 mTLS 流量。没有客户端证书或未接入网格的明文请求会被拒绝。
 - `DISABLE`：关闭入站 mTLS。
 
@@ -37,6 +37,8 @@ spec:
 服务端入站 mTLS 由 `PeerAuthentication` 控制。客户端出站加密策略会继续向 Gateway API 策略模型收敛，不再通过旧的 Dubbo 专用流量资源配置。
 
 全局自动 mTLS 使用 root namespace 策略；namespace 级别策略可以只影响某个 namespace，适合分阶段迁移。
+
+dxgate 的出站工作负载证书由控制面 SDS 动态分发。证书轮换成功后只影响新 TLS 连接；坏 PEM、证书与私钥不匹配或无效根证书会被 NACK，不替换正在使用的证书。
 
 ## 身份
 
@@ -115,6 +117,6 @@ spec:
 
 ## 当前边界
 
-当前必须具备且已经进入运行链路的是证书签发与轮换、mTLS、JWT、SPIFFE/JWT 主体授权、JWT 声明授权、ALLOW/DENY 和拒绝可观测性。同一条 rule 不能混用工作负载 `principals` 与 JWT 条件；校验 webhook 会拒绝这种无法由单个数据面完整验证的配置。
+当前必须具备且已经进入运行链路的是证书签发与轮换、mTLS、JWT、SPIFFE/JWT 主体授权、JWT 声明授权、ALLOW/DENY 和拒绝可观测性。Inherent 工作负载必须使用支持 gRPC xDS server security 的运行时；仅注入环境变量和证书文件不会把普通明文服务器自动变成 mTLS server。同一条 rule 不能混用工作负载 `principals` 与 JWT 条件；校验 webhook 会拒绝这种无法由单个数据面完整验证的配置。
 
 外部授权、审计模拟、JWT 声明复制到请求头、来源 IP/Ingress 专用授权、信任域迁移兼容和可配置 TLS 最低版本不属于当前安全架构。

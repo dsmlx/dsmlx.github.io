@@ -60,4 +60,6 @@ dxgate consumes only xDS from `dubbod`. It watches no private routing CRDs and m
 
 Each RDS update produces an immutable runtime snapshot. Ordinary HTTP/gRPC uses listeners, virtual hosts, and clusters directly. LLM, MCP, and A2A parse protocol fields before applying authentication, rate and token limits, timeouts, retries, and header transforms.
 
+dxgate subscribes to SDS `default` and `ROOTCA` resources over the same ADS connection. Validated rotations enter the immutable snapshot before ACK; invalid rotations are NACKed while the last valid certificate remains active. SDS private keys are redacted from `/debug/config`.
+
 See [the unified DxgateService API](service.md) for complete resources.

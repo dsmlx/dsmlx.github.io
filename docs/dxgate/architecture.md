@@ -60,4 +60,6 @@ dxgate 只消费 `dubbod` 的 xDS。它不 watch 独立路由 CRD，也不在数
 
 RDS 更新会生成一份不可变运行时快照。普通 HTTP/gRPC 直接按 listener、virtual host、cluster 转发；LLM、MCP、A2A 会解析协议字段，再执行认证、限流、Token 预算、超时、重试和请求头变换。
 
+dxgate 通过同一 ADS 连接订阅 SDS `default` 与 `ROOTCA`。证书通过校验后才进入不可变快照并 ACK；无效轮换会 NACK，并保留最后有效证书继续服务。SDS 私钥不会出现在 `/debug/config`。
+
 完整资源写法见[统一 DxgateService API](service.md)。

@@ -1,4 +1,4 @@
-本任务使用 `samples/app` 的 nginx 服务验证 Dubbo mTLS。mTLS 是 Mutual TLS，表示客户端和服务端使用证书互相校验身份；`grpc-inbound` 是注入到服务端 Pod 的入站代理，监听 `25080` 并转发到本地业务端口。
+本任务使用支持 gRPC xDS server security 的应用验证 Dubbo mTLS。mTLS 是 Mutual TLS，表示客户端和服务端使用证书互相校验身份。Inherent 模式不注入 `grpc-inbound` sidecar；应用运行时直接加载 LDS/CDS 和挂载证书。
 
 ## 前提条件
 
@@ -116,7 +116,7 @@ kubectl -n app exec deploy/nginx-consumer -- \
   dubbod grpc-outbound --expect nginx-v1=50,nginx-v2=50 20 | sort | uniq -c
 ```
 
-dxproxy 从经过 CA 验证的客户端证书 URI SAN 提取身份，不信任调用方自行设置的 HTTP 头。
+原生 gRPC xDS server 从经过 CA 验证的客户端证书 URI SAN 提取身份，不信任调用方自行设置的 HTTP 头。
 
 ## 启用全局自动 mTLS
 
