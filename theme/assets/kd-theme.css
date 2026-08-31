@@ -15,6 +15,8 @@ html {
 body {
   margin: 0;
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
   font-family: var(--mesh-font-system, system-ui, sans-serif);
   font-size: 0.8rem;
 }
@@ -25,6 +27,10 @@ svg { fill: currentColor; }
 .md-toggle { display: none; }
 .md-icon svg { display: block; width: 1.2rem; height: 1.2rem; }
 .md-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Keep the footer at the viewport edge when a page has little content. */
+.md-container { flex: 1 0 auto; }
+.md-footer { flex: 0 0 auto; }
 
 /* --- Header --- */
 .md-header {
@@ -501,9 +507,12 @@ label.md-header__button[for="__drawer"] { display: none; }
   align-items: center;
   justify-content: center;
   padding: 0.32rem 1rem;
-  color: #f7faff;
-  background: #173b75;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  color: #28476f;
+  background: rgba(225, 237, 250, 0.72);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  backdrop-filter: blur(14px) saturate(120%);
+  border-bottom: 1px solid rgba(89, 130, 181, 0.18);
+  box-shadow: 0 1px 6px rgba(40, 71, 111, 0.08);
   font-family: Monaco, Menlo, Consolas, "Liberation Mono", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", monospace;
   font-size: 0.68rem;
   line-height: 1.35;

@@ -139,3 +139,5 @@ curl http://localhost:8080/anthropic \
 ```
 
 `policies.auth` authenticates clients calling the gateway; it is not the provider key. Provider keys belong in `spec.ai.provider.credential`. See the [unified DxgateService API](service.md) for every field.
+
+Codex subscription vs API wiring, and the bill: [cost control](cost-control.md).

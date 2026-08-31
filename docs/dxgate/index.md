@@ -26,4 +26,4 @@ dxgate 是 Dubbo Gateway API 流量的委托网关，也是 Dubbo 服务网格�
 
 dxgate 位于集群边缘，只处理进出集群的那一跳；集群内部的服务间调用仍由网格自身完成。边缘与网格内部共用同一套声明模型，但故障域彼此隔离——网关重载配置不会影响已建立的网格内连接。
 
-接下来可以看[网关架构](architecture.md)与[统一 DxgateService API](service.md)。四类后端分别见：[普通 Kubernetes Service](http-service.md)、[LLM 路由](llm.md)、[MCP 路由](mcp.md)、[A2A 转发](a2a.md)。
+接下来可以看[网关架构](architecture.md)与[统一 DxgateService API](service.md)。四类后端分别见：[普通 Kubernetes Service](http-service.md)、[LLM 路由](llm.md)、[MCP 路由](mcp.md)、[A2A 转发](a2a.md)。订阅与 API 计费对接见[成本控制](cost-control.md)。

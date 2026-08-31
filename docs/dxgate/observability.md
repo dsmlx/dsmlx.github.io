@@ -10,6 +10,7 @@
 | `/readyz` | 就绪探针，附 `revision`、各来源版本与冲突项 |
 | `/metrics` | Prometheus 指标 |
 | `/debug/config` | 当前生效的完整运行时配置 |
+| `/debug/cost` | API 美元 + ChatGPT credits 账本 |
 | `/debug/routes` | 路由视图 |
 | `/debug/clusters` | 集群与端点视图 |
 | `/debug/backends` | 智能体后端视图 |

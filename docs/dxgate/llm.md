@@ -139,3 +139,5 @@ curl http://localhost:8080/anthropic \
 ```
 
 `policies.auth` 是客户端访问网关的认证，不是 Provider key。Provider key 必须放在 `spec.ai.provider.credential`。完整字段见[统一 DxgateService API](service.md)。
+
+订阅版（Codex profile）与 API 版如何对接、如何看账单：见[成本控制](cost-control.md)。

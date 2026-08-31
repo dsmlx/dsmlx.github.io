@@ -10,6 +10,7 @@ Metrics, logs, and traces all come out of the admin port or standard output — 
 | `/readyz` | Readiness probe, with `revision`, per-source versions, and conflicts |
 | `/metrics` | Prometheus metrics |
 | `/debug/config` | The full runtime configuration currently in effect |
+| `/debug/cost` | API USD + ChatGPT credits ledger |
 | `/debug/routes` | Route view |
 | `/debug/clusters` | Cluster and endpoint view |
 | `/debug/backends` | Agent backend view |

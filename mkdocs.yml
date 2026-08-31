@@ -99,6 +99,7 @@ plugins:
             示例: Example
             运维: Operations
             公告栏: Release Notes
+            dxgate 成本控制: dxgate cost control
 
 extra_css:
   - assets/custom.css?v=20260809-responsive-r1
@@ -138,7 +139,7 @@ nav:
           - JWT 认证与授权: tasks/security/jwt.md
       - 可观测性:
           - 指标: tasks/observability/metrics/metrics.md
-          - 访问日志: tasks/observability/logs/logs.md
+          - 日志: tasks/observability/logs/logs.md
       - 可扩展性:
           - 网格服务: tasks/extensibility/service-entry.md
           - 非网格服务: tasks/extensibility/virtual-machines.md
@@ -147,6 +148,7 @@ nav:
   - 示例: example/moviereview.md
   - 参考:
       - 应用程序标准指标: reference/application-standard-metrics.md
+      - dxgate 成本控制: dxgate/cost-control.md
   - 运维: operation/index.md
   - 公告栏: latest/release/index.md
 
